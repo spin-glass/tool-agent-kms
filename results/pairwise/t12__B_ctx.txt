@@ -1,0 +1,19 @@
+以下は、JavaScript で配列の合計を `reduce` で求める関数 `sum(numbers)` の実装です。
+
+```javascript
+function sum(numbers) {
+  return numbers.reduce((total, current) => total + current, 0);
+}
+```
+
+### 説明:
+- `reduce` メソッドは、配列の各要素に対して一度のイテレーションで処理を行い、最終的な結果を返します。
+- 第一引数 `total` は累積値、第二引数 `current` は現在処理している要素です。
+- 初期値として `0` を指定することで、配列が空でも `0` を返すようにしています。
+
+### 例:
+```javascript
+console.log(sum([1, 2, 3, 4])); // 10
+```
+
+この関数は、配列内の数値をすべて足し合わせて合計を返します。

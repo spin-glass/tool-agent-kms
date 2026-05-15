@@ -913,6 +913,185 @@ expansion is the most useful of the three for paraphrased queries.
 
 
 # ─────────────────────────────────────────────────────────────────────────
+# 07. End-to-end pairwise coding evaluation
+# ─────────────────────────────────────────────────────────────────────────
+
+NB07 = [
+    ("markdown", """# 07. End-to-end Pairwise Coding Evaluation
+
+**Question**: does injecting agent-kms's retrieved context into a
+coding-LLM's prompt actually produce **better code** than the same
+prompt without context?
+
+Notebooks 02-06 measure *retrieval quality* (does the right chunk
+come back?). This notebook measures *downstream usefulness* (does
+that chunk actually help the LLM solve the task?).
+
+## Setup
+
+| Component | Choice |
+|---|---|
+| Target LLM (writes code) | **Ollama `qwen3:8b`** — local, mid-tier; weak enough that retrieval signal is expected to be measurable |
+| Coding tasks | **25 hand-authored Japanese instructions** covering React / JS Primer topics that the corpus actually contains. See `data/coding_tasks.yaml` |
+| Conditions | **A_noctx** (prompt only) vs **B_ctx** (prompt + top-K chunks from `agent_kms.retrieve(score_threshold=0.81)`) |
+| Judge | **Ollama `qwen2.5:14b`** — stronger local model. Each (A,B) pair is judged in **both orderings** (AB, BA) to neutralise positional bias |
+| Verdict per task | `ctx_win` / `noctx_win` / `tie` based on whether ctx wins both, neither, or one of the two orderings |
+
+Outputs live under `results/pairwise/`:
+- `<task_id>__A_noctx.txt` / `__B_ctx.txt` — raw LLM outputs
+- `_generation_meta.csv` — per-call latency & token counts
+- `_judge_results.csv` — raw judge verdicts (2 rows per task)
+- `_judge_results_agg.csv` — collapsed per-task outcomes
+
+This notebook **only analyses** existing results. To regenerate them:
+
+```bash
+python scripts/run_pairwise_generation.py
+python scripts/run_pairwise_judge.py
+```
+"""),
+    ("code", """import sys
+from pathlib import Path
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+ROOT = Path.cwd()
+while not (ROOT / "pyproject.toml").exists() and ROOT != ROOT.parent:
+    ROOT = ROOT.parent
+sys.path.insert(0, str(ROOT))
+
+sns.set_theme(style="whitegrid")
+
+raw = pd.read_csv(ROOT / "results" / "pairwise" / "_judge_results.csv")
+agg = pd.read_csv(ROOT / "results" / "pairwise" / "_judge_results_agg.csv")
+gen = pd.read_csv(ROOT / "results" / "pairwise" / "_generation_meta.csv")
+
+print(f"raw verdicts: {len(raw)} rows ({raw['task_id'].nunique()} tasks × 2 orderings)")
+print(f"per-task outcomes: {len(agg)}")
+"""),
+    ("code", """# Per-ordering raw verdict distribution
+print("Per-ordering winners (positional bias check):")
+print(raw.groupby("order")["winner"].value_counts().unstack(fill_value=0))
+print()
+print("Per-task aggregated outcome:")
+print(agg["outcome"].value_counts().to_string())
+"""),
+    ("code", """# Collapse to strict / lenient win-rates for ctx
+counts = agg["outcome"].value_counts()
+n_tasks = len(agg)
+strict_ctx_win = counts.get("ctx_win", 0)
+strict_noctx_win = counts.get("noctx_win", 0)
+lean_ctx = counts.get("ctx_win", 0) + counts.get("ctx_lean", 0)
+lean_noctx = counts.get("noctx_win", 0) + counts.get("noctx_lean", 0)
+ties = counts.get("tie", 0)
+
+print(f"n_tasks = {n_tasks}")
+print(f"strict ctx wins   : {strict_ctx_win}  ({strict_ctx_win/n_tasks:.1%})")
+print(f"strict noctx wins : {strict_noctx_win}  ({strict_noctx_win/n_tasks:.1%})")
+print(f"lean ctx (incl tie-broken): {lean_ctx}  ({lean_ctx/n_tasks:.1%})")
+print(f"lean noctx                 : {lean_noctx}  ({lean_noctx/n_tasks:.1%})")
+print(f"ties                       : {ties}  ({ties/n_tasks:.1%})")
+"""),
+    ("code", """# McNemar test on (strict ctx_win vs strict noctx_win)
+# H0: retrieval doesn't change which condition wins.
+from scipy.stats import binomtest
+
+discordant = strict_ctx_win + strict_noctx_win
+if discordant >= 1:
+    p = binomtest(strict_ctx_win, n=discordant, p=0.5, alternative="two-sided").pvalue
+    print(f"discordant tasks: {discordant}  (ctx={strict_ctx_win}, noctx={strict_noctx_win})")
+    print(f"McNemar exact two-sided p-value: {p:.3f}")
+else:
+    print("No discordant tasks — cannot compute test")
+"""),
+    ("code", """# Visualise outcomes
+order_winners = (raw.groupby(["order", "winner"]).size().unstack(fill_value=0))
+
+fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
+
+ax = axes[0]
+order_winners.plot(kind="bar", stacked=True, ax=ax, color=["#1f77b4", "#999999", "#ff7f0e"])
+ax.set_title("Raw judge verdicts — positional check")
+ax.set_xlabel("ordering shown to judge")
+ax.set_ylabel("count over 25 tasks")
+ax.set_xticklabels(["A=noctx, B=ctx", "A=ctx, B=noctx"], rotation=0)
+ax.legend(title="winner")
+
+ax = axes[1]
+outcome_order = ["ctx_win", "ctx_lean", "tie", "noctx_lean", "noctx_win"]
+counts_order = [counts.get(o, 0) for o in outcome_order]
+colors = ["#1f7720", "#86c47a", "#999999", "#f0a07a", "#a82020"]
+ax.bar(outcome_order, counts_order, color=colors)
+ax.set_title("Per-task aggregated outcome")
+ax.set_ylabel("number of tasks")
+ax.set_xticklabels(outcome_order, rotation=20, ha="right")
+for i, c in enumerate(counts_order):
+    if c:
+        ax.text(i, c + 0.1, str(c), ha="center", fontsize=10)
+
+plt.tight_layout()
+plt.savefig(ROOT / "results" / "fig_pairwise_outcomes.png", dpi=140, bbox_inches="tight")
+plt.show()
+"""),
+    ("code", """# Per-task breakdown for the writeup
+import yaml
+with (ROOT / "data" / "coding_tasks.yaml").open(encoding="utf-8") as f:
+    tasks_meta = {t["id"]: t for t in yaml.safe_load(f)}
+
+agg_anno = agg.copy()
+agg_anno["difficulty"] = agg_anno["task_id"].map(lambda x: tasks_meta[x]["difficulty"])
+agg_anno["topic"] = agg_anno["task_id"].map(
+    lambda x: tasks_meta[x]["expected_topics"][0] if tasks_meta[x]["expected_topics"] else ""
+)
+print(agg_anno.to_string(index=False))
+"""),
+    ("code", """# Generation cost — context overhead
+print("Generation latency by condition (seconds):")
+print(gen.groupby("condition")["elapsed_s"].describe()[["count", "mean", "50%", "max"]].round(1))
+print()
+print("Output size (chars):")
+print(gen.groupby("condition")["out_chars"].describe()[["count", "mean", "50%", "max"]].round(0))
+print()
+print("Tokens generated (output only):")
+print(gen.groupby("condition")["tokens_out"].describe()[["count", "mean", "50%", "max"]].round(0))
+"""),
+    ("markdown", """## Findings
+
+*(Filled in after running. Template:)*
+
+- **Strict pairwise**: ctx wins X tasks, noctx wins Y tasks, ties Z.
+  McNemar exact test: p = ?.
+- **Effect size**: ctx win-rate ≈ ?%. Interpretation per
+  Cohen-style thresholds: small (~5pp) / medium (~10-15pp) / large (>20pp).
+- **Positional bias check**: Does the "answer shown first" win
+  systematically? If yes, the swap-and-require-both heuristic is doing
+  real work; if no, our ties may be conservative.
+- **Where ctx helps most**: list 2-3 tasks where ctx wins decisively
+  (both orderings) and explain (was the LLM missing API knowledge,
+  syntax detail, or an edge case the context surfaced?).
+- **Where ctx hurts**: any tasks where noctx wins both orderings?
+  Likely cause: context dilution / off-topic chunks.
+- **Cost overhead**: B_ctx adds ~X seconds and ~Y tokens per call
+  relative to A_noctx.
+
+### Validity caveats
+
+- **N=25 is small.** Detecting a 10pp absolute effect at 80% power
+  needs ~80-100 tasks. Read p-values directionally only.
+- **Judge model is qwen2.5:14b**, run locally. A Claude-grade judge
+  would be more reliable. Position-swap mitigates but doesn't
+  eliminate judge bias.
+- **Corpus matches task domain by construction** (we wrote tasks
+  knowing the corpus content). Real-world deployments often have
+  retrieve-task mismatch which would erode any signal we measure here.
+- **qwen3:8b is one specific model.** Stronger LLMs (Claude / GPT)
+  may show smaller signal because they already know React/JS deeply.
+"""),
+]
+
+
+# ─────────────────────────────────────────────────────────────────────────
 # Write all notebooks
 # ─────────────────────────────────────────────────────────────────────────
 
@@ -923,4 +1102,5 @@ write_notebook(str(NB / "03_threshold_sweep.ipynb"), NB03)
 write_notebook(str(NB / "04_embedding_model_comparison.ipynb"), NB04)
 write_notebook(str(NB / "05_boost_ablation.ipynb"), NB05)
 write_notebook(str(NB / "06_findings_and_recommendations.ipynb"), NB06)
+write_notebook(str(NB / "07_pairwise_coding_eval.ipynb"), NB07)
 print("\\nall notebooks rebuilt.")

@@ -1,0 +1,33 @@
+```jsx
+import React, { useState } from 'react';
+
+// 親コンポーネント Form
+function Form() {
+  const [name, setName] = useState('');
+
+  return (
+    <div>
+      <h2>Form Component</h2>
+      <NameInput value={name} onChange={setName} />
+    </div>
+  );
+}
+
+// 子コンポーネント NameInput
+function NameInput({ value, onChange }) {
+  const handleChange = (e) => {
+    onChange(e.target.value);
+  };
+
+  return (
+    <div>
+      <label>
+        Name:
+        <input type="text" value={value} onChange={handleChange} />
+      </label>
+    </div>
+  );
+}
+
+export default Form;
+```
