@@ -1,0 +1,280 @@
+# Hand-authored evaluation queries for rag-evaluation-jp.
+#
+# Each gold entry is (source basename, exact H2 heading string) as recorded
+# by agent-kms's `markdown_h2` chunker.  Headings preserve the
+# `{#anchor}` / `{/*anchor*/}` suffixes — that's how they live in Qdrant
+# payloads, so we use them verbatim here to keep equality matching simple.
+#
+# Authoring strategy: queries were written after browsing the 130 chunks
+# actually present in the eval_corpus collection, so every gold heading
+# is a real chunk that *could* be retrieved.  Queries deliberately span:
+#   - direct keyword hits (q001-q010)
+#   - paraphrased intent (q011-q022)
+#   - cross-section / multi-relevant (q023-q028)
+#   - adversarial "no good answer" (q029-q032) — these test empty_rate
+#
+# 32 queries total.
+
+# ────────────────────────────────────────────────────────────────────────
+# Direct keyword retrieval
+# ────────────────────────────────────────────────────────────────────────
+
+- id: q001
+  query: "Reactで初めてコンポーネントを定義する方法"
+  gold:
+    - source: "react-your-first-component.md"
+      heading: "コンポーネントの定義 {/*defining-a-component*/}"
+    - source: "react-your-first-component.md"
+      heading: "コンポーネント：UI の構成部品 {/*components-ui-building-blocks*/}"
+  notes: "intro-level direct hit on react component definition"
+
+- id: q002
+  query: "useStateでstate変数を追加する"
+  gold:
+    - source: "react-state-a-components-memory.md"
+      heading: "state 変数の追加 {/*adding-a-state-variable*/}"
+  notes: "single-section direct hit"
+
+- id: q003
+  query: "Reactでイベントハンドラを登録する方法"
+  gold:
+    - source: "react-responding-to-events.md"
+      heading: "イベントハンドラの追加 {/*adding-event-handlers*/}"
+  notes: "direct keyword match"
+
+- id: q004
+  query: "Reactのイベントバブリングと伝播の挙動"
+  gold:
+    - source: "react-responding-to-events.md"
+      heading: "イベント伝播 {/*event-propagation*/}"
+  notes: "synonym: バブリング → 伝播"
+
+- id: q005
+  query: "Reactコンポーネントに props を渡す書き方"
+  gold:
+    - source: "react-passing-props-to-a-component.md"
+      heading: "コンポーネントに props を渡す {/*passing-props-to-a-component*/}"
+    - source: "react-passing-props-to-a-component.md"
+      heading: "お馴染みの props {/*familiar-props*/}"
+  notes: "two valid hits in same file"
+
+- id: q006
+  query: "JSXのスプレッド構文でpropsを転送する"
+  gold:
+    - source: "react-passing-props-to-a-component.md"
+      heading: "JSX スプレッド構文で props を転送する {/*forwarding-props-with-the-jsx-spread-syntax*/}"
+  notes: "exact terminology"
+
+- id: q007
+  query: "JavaScript の配列を作成する方法"
+  gold:
+    - source: "jsprimer-array.md"
+      heading: "配列の作成とアクセス {#create-and-access}"
+    - source: "jsprimer-array.md"
+      heading: "配列 {#array}"
+  notes: "two valid sections"
+
+- id: q008
+  query: "JSON.stringifyでオブジェクトを文字列に変換する"
+  gold:
+    - source: "jsprimer-json.md"
+      heading: "`JSON`オブジェクト {#json-object}"
+    - source: "jsprimer-json.md"
+      heading: "JSON {#json}"
+  notes: "JSON serialization"
+
+- id: q009
+  query: "try catch で例外を捕捉する書き方"
+  gold:
+    - source: "jsprimer-error-try-catch.md"
+      heading: "try...catch構文 {#try-catch}"
+    - source: "jsprimer-error-try-catch.md"
+      heading: "例外処理 {#error-handling}"
+  notes: "core error handling"
+
+- id: q010
+  query: "Async Function と Promise の関係"
+  gold:
+    - source: "jsprimer-async.md"
+      heading: "Async FunctionはPromiseを返す {#async-function-return-promise}"
+    - source: "jsprimer-async.md"
+      heading: "[ES2017] Async Function {#async-function}"
+  notes: "two related sections"
+
+# ────────────────────────────────────────────────────────────────────────
+# Paraphrased intent (no shared keywords with heading)
+# ────────────────────────────────────────────────────────────────────────
+
+- id: q011
+  query: "親から渡された値を子コンポーネントで初期値に使ったあと書き換えたい"
+  gold:
+    - source: "react-passing-props-to-a-component.md"
+      heading: "props は時間とともに変化する {/*how-props-change-over-time*/}"
+  notes: "paraphrased — query has no overlap with heading words"
+
+- id: q012
+  query: "JSX を return せずに条件によって描画を切り替える書き方"
+  gold:
+    - source: "react-conditional-rendering.md"
+      heading: "条件付きで JSX を含める {/*conditionally-including-jsx*/}"
+    - source: "react-conditional-rendering.md"
+      heading: "条件を満たす場合に JSX を返す {/*conditionally-returning-jsx*/}"
+  notes: "tests both sub-sections"
+
+- id: q013
+  query: "コンポーネント内で複数の状態を別々に保持したい"
+  gold:
+    - source: "react-state-a-components-memory.md"
+      heading: "コンポーネントで複数の state 変数を使う {/*giving-a-component-multiple-state-variables*/}"
+  notes: "paraphrase — '別々' is not in heading"
+
+- id: q014
+  query: "なぜ普通の変数ではなくstateが必要なのか"
+  gold:
+    - source: "react-state-a-components-memory.md"
+      heading: "通常の変数ではうまくいかない例 {/*when-a-regular-variable-isnt-enough*/}"
+  notes: "rationale question"
+
+- id: q015
+  query: "stateを別のコンポーネントから読み書きする"
+  gold:
+    - source: "react-managing-state.md"
+      heading: "コンポーネント間で state を共有する {/*sharing-state-between-components*/}"
+  notes: "state lift-up"
+
+- id: q016
+  query: "ReactのuseEffectは値が変わるたびに動く"
+  gold:
+    - source: "react-lifecycle-of-reactive-effects.md"
+      heading: "エフェクトはリアクティブ (reactive) な値に \"反応\" する {/*effects-react-to-reactive-values*/}"
+    - source: "react-lifecycle-of-reactive-effects.md"
+      heading: "エフェクトのライフサイクル {/*the-lifecycle-of-an-effect*/}"
+  notes: "topic: effect dependencies"
+
+- id: q017
+  query: "状態管理を関数にまとめたい"
+  gold:
+    - source: "react-managing-state.md"
+      heading: "state ロジックをリデューサに抽出する {/*extracting-state-logic-into-a-reducer*/}"
+  notes: "intent: extract state to reducer"
+
+- id: q018
+  query: "Reactでグローバルに値を共有したい"
+  gold:
+    - source: "react-managing-state.md"
+      heading: "コンテクストで深くデータを受け渡す {/*passing-data-deeply-with-context*/}"
+  notes: "context for prop drilling"
+
+- id: q019
+  query: "配列の中身を一つずつ処理する"
+  gold:
+    - source: "jsprimer-array.md"
+      heading: "配列を反復処理するメソッド {#array-iterate}"
+  notes: "paraphrased: '一つずつ処理' → 反復処理"
+
+- id: q020
+  query: "配列を変更せずに新しい配列を返したい"
+  gold:
+    - source: "jsprimer-array.md"
+      heading: "破壊的なメソッドと非破壊的なメソッド {#mutable-immutable}"
+  notes: "immutable update intent"
+
+- id: q021
+  query: "クラスのプロパティを外部から見えなくする"
+  gold:
+    - source: "jsprimer-class.md"
+      heading: "[ES2022] Privateクラスフィールド {#private-class-fields}"
+  notes: "encapsulation paraphrase"
+
+- id: q022
+  query: "親クラスのメソッドをオーバーライドする"
+  gold:
+    - source: "jsprimer-class.md"
+      heading: "継承 {#extends}"
+    - source: "jsprimer-class.md"
+      heading: "プロトタイプチェーン {#prototype-chain}"
+  notes: "inheritance paraphrase"
+
+# ────────────────────────────────────────────────────────────────────────
+# Cross-section / multi-relevant
+# ────────────────────────────────────────────────────────────────────────
+
+- id: q023
+  query: "オブジェクトのプロパティに値を代入したり削除したりする"
+  gold:
+    - source: "jsprimer-object.md"
+      heading: "プロパティの追加 {#add-property}"
+    - source: "jsprimer-object.md"
+      heading: "プロパティへのアクセス {#property-access}"
+  notes: "two sections both highly relevant"
+
+- id: q024
+  query: "オプショナルチェーンでネストしたプロパティを安全に読む"
+  gold:
+    - source: "jsprimer-object.md"
+      heading: "[ES2020] Optional chaining演算子（`?.`） {#optional-chaining-operator}"
+    - source: "jsprimer-object.md"
+      heading: "プロパティの存在を確認する {#confirm-property}"
+  notes: "optional chaining + existence check both apply"
+
+- id: q025
+  query: "コールバック関数を引数として渡す"
+  gold:
+    - source: "jsprimer-function-declaration.md"
+      heading: "コールバック関数 {#callback}"
+    - source: "jsprimer-function-declaration.md"
+      heading: "関数はオブジェクト {#first-class-function}"
+  notes: "two related sections (callback + first-class)"
+
+- id: q026
+  query: "可変長の引数を関数で受け取る"
+  gold:
+    - source: "jsprimer-function-declaration.md"
+      heading: "可変長引数 {#variable-arguments}"
+    - source: "jsprimer-function-declaration.md"
+      heading: "[ES2015] 関数の引数と分割代入 {#function-destructuring}"
+  notes: "rest params + destructuring both relevant"
+
+- id: q027
+  query: "文字列を特定のパターンで検索したい"
+  gold:
+    - source: "jsprimer-string.md"
+      heading: "文字列の検索 {#search}"
+    - source: "jsprimer-string.md"
+      heading: "正規表現オブジェクト {#regexp-object}"
+  notes: "search + regex both relevant"
+
+- id: q028
+  query: "awaitで非同期処理を順番に待つ"
+  gold:
+    - source: "jsprimer-async.md"
+      heading: "`await`式 {#await-expression}"
+    - source: "jsprimer-async.md"
+      heading: "Async Functionの定義 {#declare-async-function}"
+    - source: "jsprimer-async.md"
+      heading: "[ES2017] Async Function {#async-function}"
+  notes: "three sections cover this"
+
+# ────────────────────────────────────────────────────────────────────────
+# Adversarial — corpus has no good answer
+# ────────────────────────────────────────────────────────────────────────
+
+- id: q029
+  query: "PostgreSQL の logical replication を設定する手順"
+  gold: []
+  notes: "infra/DB topic — corpus is JS/React only. Expect empty_rate to count this."
+
+- id: q030
+  query: "iPhoneでバッテリーを長持ちさせる節電設定"
+  gold: []
+  notes: "out-of-domain consumer topic"
+
+- id: q031
+  query: "Kubernetes のサイドカーコンテナのベストプラクティス"
+  gold: []
+  notes: "out-of-domain — devops/k8s"
+
+- id: q032
+  query: "Pythonの内包表記でリストを作る"
+  gold: []
+  notes: "adjacent language (Python) — should NOT match JS array sections"
