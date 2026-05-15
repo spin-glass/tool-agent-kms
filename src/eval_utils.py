@@ -14,11 +14,50 @@ records in payloads.
 from __future__ import annotations
 
 import math
+import os
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+
+def resolve_eval_paths(repo_root: Path) -> tuple[Path, Path, str]:
+    """Resolve corpus dir, queries file, and Qdrant collection for the
+    current evaluation mode.
+
+    Two modes:
+
+    - ``EVAL_MODE=public`` (default): everything under ``data/corpus/`` +
+      ``data/eval_queries.yaml`` + collection ``eval_corpus``. This is
+      the corpus that ships with the repository (React JP + JS Primer JP,
+      both CC-BY-4.0).
+
+    - ``EVAL_MODE=private``: switch to ``data/private/corpus/`` +
+      ``data/private/eval_queries.yaml`` + collection
+      ``eval_corpus_private``. The ``data/private/`` tree is gitignored so
+      proprietary corpora can be evaluated with the same notebooks
+      without leaking into the published portfolio. Aggregate metrics
+      from a private run are publishable (see README "Validation on
+      private corpora"); raw chunks and queries are not.
+
+    Override the collection name explicitly via ``AGENT_KMS_COLLECTION``
+    when you want to keep multiple private experiments side-by-side
+    (e.g. ``eval_corpus_private_2026q2``).
+    """
+    mode = os.environ.get("EVAL_MODE", "public").lower()
+    if mode == "private":
+        root = repo_root / "data" / "private"
+        return (
+            root / "corpus",
+            root / "eval_queries.yaml",
+            os.environ.get("AGENT_KMS_COLLECTION", "eval_corpus_private"),
+        )
+    return (
+        repo_root / "data" / "corpus",
+        repo_root / "data" / "eval_queries.yaml",
+        os.environ.get("AGENT_KMS_COLLECTION", "eval_corpus"),
+    )
 
 
 def chunk_key(item: dict) -> tuple[str, str]:

@@ -178,6 +178,55 @@ Each notebook is end-to-end runnable and writes its own outputs to
 (via `scripts/run_one_model.py`) to avoid cross-model state spilling
 through `sentence-transformers` / `qdrant-client` caches.
 
+## Private evaluation mode
+
+The methodology is most informative when validated on the corpus a tool
+will actually be used against. For agent-kms that means real project
+documentation — typically proprietary and unpublishable.
+
+Every notebook resolves its paths through `src.eval_utils.resolve_eval_paths()`,
+which switches on the `EVAL_MODE` environment variable:
+
+```bash
+# Public corpus (default) — React JP + JS Primer JP, committed
+jupyter lab notebooks/
+
+# Private corpus — proprietary docs under data/private/, gitignored
+EVAL_MODE=private jupyter lab notebooks/
+```
+
+Paths resolved per mode:
+
+| | `public`                    | `private`                            |
+|---|------------------------------|--------------------------------------|
+| corpus dir       | `data/corpus/`              | `data/private/corpus/`              |
+| queries file     | `data/eval_queries.yaml`    | `data/private/eval_queries.yaml`    |
+| Qdrant collection| `eval_corpus`               | `eval_corpus_private`               |
+
+Setting up the private mode locally (none of these files are tracked):
+
+```bash
+mkdir -p data/private/corpus
+cp /path/to/your/docs/*.md data/private/corpus/
+cp data/eval_queries.example.yaml data/private/eval_queries.yaml
+# Hand-author 30-50 (query, gold) pairs in data/private/eval_queries.yaml
+EVAL_MODE=private jupyter lab notebooks/
+```
+
+### What is publishable from a private run
+
+Aggregate-only metrics are safe to put in this README's "Findings" section
+or in a dedicated subsection — for example:
+
+> Validated on a 416-chunk Japanese technical-doc corpus from internal
+> projects (not published). The threshold optimum was T=0.85 — close to
+> the public corpus's T=0.81 — and the embedding-model ordering was
+> reproduced (ruri-v3-310m > e5-large > ruri-v3-30m > e5-base).
+
+Raw chunks, query bodies, retrieved-chunk paths, and per-source-type
+breakdowns are kept local. `results-private/` and any file matching
+`results/*-private.*` are gitignored alongside `data/private/`.
+
 ## Notebook structure
 
 | Notebook | Purpose |

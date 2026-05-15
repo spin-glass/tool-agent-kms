@@ -47,15 +47,24 @@ while not (ROOT / "pyproject.toml").exists() and ROOT != ROOT.parent:
 
 # Isolate from personal agent-kms data: dedicated Qdrant instance (port 6433)
 # AND a dedicated collection name. The personal Qdrant on :6333 is untouched.
-os.environ["QDRANT_URL"] = "http://localhost:6433"
-os.environ["AGENT_KMS_COLLECTION"] = "eval_corpus"
-os.environ["AGENT_KMS_CONFIG"] = str(ROOT / ".agent-kms" / "kms.toml")
-os.environ["AGENT_KMS_KNOWLEDGE_ROOT"] = str(ROOT / "data" / "corpus")
-
+#
+# EVAL_MODE selects between the committed public corpus (data/corpus/) and a
+# gitignored private corpus (data/private/corpus/). See README "Private
+# evaluation mode" for the design — same notebook, two corpora.
 sys.path.insert(0, str(ROOT))
+from src.eval_utils import resolve_eval_paths
+
+CORPUS_DIR, QUERIES_PATH, COLLECTION = resolve_eval_paths(ROOT)
+os.environ["QDRANT_URL"] = "http://localhost:6433"
+os.environ["AGENT_KMS_COLLECTION"] = COLLECTION
+os.environ["AGENT_KMS_CONFIG"] = str(ROOT / ".agent-kms" / "kms.toml")
+os.environ["AGENT_KMS_KNOWLEDGE_ROOT"] = str(CORPUS_DIR)
+
 print("project root:", ROOT)
+print("eval mode:   ", os.environ.get("EVAL_MODE", "public"))
 print("qdrant:      ", os.environ["QDRANT_URL"])
-print("collection:  ", os.environ["AGENT_KMS_COLLECTION"])
+print("collection:  ", COLLECTION)
+print("corpus:      ", CORPUS_DIR)
 """),
     ("markdown", """## 1. Qdrant reachability"""),
     ("code", """from agent_kms.store import get_client
@@ -66,11 +75,12 @@ print("collections on this Qdrant:", existing)
 """),
     ("markdown", """## 2. Corpus inventory
 
-The corpus is committed at `data/corpus/`. Each file is a Japanese
-technical-doc markdown with H2-sectioned content suitable for the
-`markdown_h2` chunker.
+The corpus is resolved via `EVAL_MODE`: public (default) reads from
+`data/corpus/` (committed CC-BY docs), private reads from
+`data/private/corpus/` (gitignored). Each file is markdown with
+H2-sectioned content suitable for the `markdown_h2` chunker.
 """),
-    ("code", """corpus_dir = ROOT / "data" / "corpus"
+    ("code", """corpus_dir = CORPUS_DIR
 docs = sorted(p for p in corpus_dir.glob("*.md") if p.name != "LICENSES.md")
 print(f"corpus docs: {len(docs)}")
 for d in docs:
@@ -164,11 +174,14 @@ ROOT = Path.cwd()
 while not (ROOT / "pyproject.toml").exists() and ROOT != ROOT.parent:
     ROOT = ROOT.parent
 
-os.environ["QDRANT_URL"] = "http://localhost:6433"
-os.environ["AGENT_KMS_COLLECTION"] = "eval_corpus"
-os.environ["AGENT_KMS_CONFIG"] = str(ROOT / ".agent-kms" / "kms.toml")
-os.environ["AGENT_KMS_KNOWLEDGE_ROOT"] = str(ROOT / "data" / "corpus")
 sys.path.insert(0, str(ROOT))
+from src.eval_utils import resolve_eval_paths
+
+CORPUS_DIR, QUERIES_PATH, COLLECTION = resolve_eval_paths(ROOT)
+os.environ["QDRANT_URL"] = "http://localhost:6433"
+os.environ["AGENT_KMS_COLLECTION"] = COLLECTION
+os.environ["AGENT_KMS_CONFIG"] = str(ROOT / ".agent-kms" / "kms.toml")
+os.environ["AGENT_KMS_KNOWLEDGE_ROOT"] = str(CORPUS_DIR)
 
 from agent_kms.retrieve import retrieve_simple
 """),
@@ -236,18 +249,21 @@ ROOT = Path.cwd()
 while not (ROOT / "pyproject.toml").exists() and ROOT != ROOT.parent:
     ROOT = ROOT.parent
 
-os.environ["QDRANT_URL"] = "http://localhost:6433"
-os.environ["AGENT_KMS_COLLECTION"] = "eval_corpus"
-os.environ["AGENT_KMS_CONFIG"] = str(ROOT / ".agent-kms" / "kms.toml")
-os.environ["AGENT_KMS_KNOWLEDGE_ROOT"] = str(ROOT / "data" / "corpus")
 sys.path.insert(0, str(ROOT))
+from src.eval_utils import resolve_eval_paths
+
+CORPUS_DIR, QUERIES_PATH, COLLECTION = resolve_eval_paths(ROOT)
+os.environ["QDRANT_URL"] = "http://localhost:6433"
+os.environ["AGENT_KMS_COLLECTION"] = COLLECTION
+os.environ["AGENT_KMS_CONFIG"] = str(ROOT / ".agent-kms" / "kms.toml")
+os.environ["AGENT_KMS_KNOWLEDGE_ROOT"] = str(CORPUS_DIR)
 
 from agent_kms.retrieve import retrieve
 from src.eval_utils import load_queries, sweep_threshold, gold_set, chunk_key
 
 sns.set_theme(style="whitegrid")
 """),
-    ("code", """queries = load_queries(ROOT / "data" / "eval_queries.yaml")
+    ("code", """queries = load_queries(QUERIES_PATH)
 in_domain   = [q for q in queries if q.get("gold")]
 adversarial = [q for q in queries if not q.get("gold")]
 print(f"{len(queries)} total queries  |  in-domain {len(in_domain)}  |  adversarial {len(adversarial)}")
@@ -446,7 +462,7 @@ for model, dim in MODELS:
     r = subprocess.run(
         [sys.executable, str(script),
          "--model", model, "--dim", str(dim),
-         "--collection", f"eval_corpus_{safe(model)}",
+         "--collection", f"{COLLECTION}_{safe(model)}",
          "--out", str(out)],
         cwd=ROOT,
         capture_output=True, text=True,
@@ -617,11 +633,14 @@ ROOT = Path.cwd()
 while not (ROOT / "pyproject.toml").exists() and ROOT != ROOT.parent:
     ROOT = ROOT.parent
 
-os.environ["QDRANT_URL"] = "http://localhost:6433"
-os.environ["AGENT_KMS_COLLECTION"] = "eval_corpus"
-os.environ["AGENT_KMS_CONFIG"] = str(ROOT / ".agent-kms" / "kms.toml")
-os.environ["AGENT_KMS_KNOWLEDGE_ROOT"] = str(ROOT / "data" / "corpus")
 sys.path.insert(0, str(ROOT))
+from src.eval_utils import resolve_eval_paths
+
+CORPUS_DIR, QUERIES_PATH, COLLECTION = resolve_eval_paths(ROOT)
+os.environ["QDRANT_URL"] = "http://localhost:6433"
+os.environ["AGENT_KMS_COLLECTION"] = COLLECTION
+os.environ["AGENT_KMS_CONFIG"] = str(ROOT / ".agent-kms" / "kms.toml")
+os.environ["AGENT_KMS_KNOWLEDGE_ROOT"] = str(CORPUS_DIR)
 
 from agent_kms.retrieve import retrieve
 from src.eval_utils import load_queries, gold_set, chunk_key, precision_at_threshold, recall_at_threshold, f1_at_threshold
@@ -637,7 +656,7 @@ if sweep_csv.exists():
     T = float(s.loc[s["f1"].idxmax(), "threshold"])
 print(f"Using best threshold T = {T} (from notebook 03 sweep)")
 
-queries = load_queries(ROOT / "data" / "eval_queries.yaml")
+queries = load_queries(QUERIES_PATH)
 in_domain = [q for q in queries if q.get("gold")]
 adversarial = [q for q in queries if not q.get("gold")]
 print(f"in-domain {len(in_domain)} | adversarial {len(adversarial)}")
