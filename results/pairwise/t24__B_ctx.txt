@@ -1,0 +1,33 @@
+以下は、Reactで`state`が独立しておりプライベートであることを示すコードです。このコードでは、`Card`コンポーネントを2つ並べ、それぞれが独自の`useState`カウンタを持ち、片方のクリックがもう片方に影響しないことを示します。
+
+```jsx
+import React from 'react';
+
+function Card({ title, count }) {
+  const [localCount, setLocalCount] = React.useState(count);
+
+  return (
+    <div style={{ border: '1px solid #ccc', padding: '10px', margin: '10px', width: '200px' }}>
+      <h3>{title}</h3>
+      <p>Count: {localCount}</p>
+      <button onClick={() => setLocalCount(localCount + 1)}>Increment</button>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <div>
+      <Card title="Card 1" count={0} />
+      <Card title="Card 2" count={0} />
+    </div>
+  );
+}
+```
+
+### 説明:
+- `Card`コンポーネントは`useState`を使って独自のカウンタ(`localCount`)を持っています。
+- `App`コンポーネントで`Card`を2つレンダーし、それぞれの`count`プロパティを0に初期化しています。
+- それぞれの`Card`は独立した`useState`を保持しているため、片方のクリックがもう片方のカウンタに影響を与えません。
+
+このコードにより、Reactの`state`がコンポーネントごとに独立して管理されるプライベートな性質が明確に示されます。

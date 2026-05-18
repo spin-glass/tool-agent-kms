@@ -1058,35 +1058,101 @@ print(gen.groupby("condition")["tokens_out"].describe()[["count", "mean", "50%",
 """),
     ("markdown", """## Findings
 
-*(Filled in after running. Template:)*
+### Headline: **no statistically significant effect** on this corpus
 
-- **Strict pairwise**: ctx wins X tasks, noctx wins Y tasks, ties Z.
-  McNemar exact test: p = ?.
-- **Effect size**: ctx win-rate ≈ ?%. Interpretation per
-  Cohen-style thresholds: small (~5pp) / medium (~10-15pp) / large (>20pp).
-- **Positional bias check**: Does the "answer shown first" win
-  systematically? If yes, the swap-and-require-both heuristic is doing
-  real work; if no, our ties may be conservative.
-- **Where ctx helps most**: list 2-3 tasks where ctx wins decisively
-  (both orderings) and explain (was the LLM missing API knowledge,
-  syntax detail, or an edge case the context surfaced?).
-- **Where ctx hurts**: any tasks where noctx wins both orderings?
-  Likely cause: context dilution / off-topic chunks.
-- **Cost overhead**: B_ctx adds ~X seconds and ~Y tokens per call
-  relative to A_noctx.
+| metric | value |
+|---|---|
+| strict ctx wins (won both orderings) | **6 / 25 (24%)** |
+| strict noctx wins                    | **5 / 25 (20%)** |
+| ties                                 | **13 / 25 (52%)** |
+| McNemar exact two-sided p            | **1.000** |
 
-### Validity caveats
+With qwen3:8b on this React + JS corpus, **agent-kms retrieval does
+not measurably improve coding output quality** in a way that survives
+the swap-and-require-both bias control. The +1 task advantage for ctx
+(6 vs 5) is noise.
 
-- **N=25 is small.** Detecting a 10pp absolute effect at 80% power
-  needs ~80-100 tasks. Read p-values directionally only.
-- **Judge model is qwen2.5:14b**, run locally. A Claude-grade judge
-  would be more reliable. Position-swap mitigates but doesn't
-  eliminate judge bias.
-- **Corpus matches task domain by construction** (we wrote tasks
-  knowing the corpus content). Real-world deployments often have
-  retrieve-task mismatch which would erode any signal we measure here.
-- **qwen3:8b is one specific model.** Stronger LLMs (Claude / GPT)
-  may show smaller signal because they already know React/JS deeply.
+### Positional bias is large — the swap heuristic was doing real work
+
+| order shown | ctx wins | noctx wins | ties |
+|---|---|---|---|
+| AB (X=noctx, Y=ctx shown first) | 7  | **16** | 2 |
+| BA (X=ctx,   Y=noctx shown first) | **17** | 5  | 3 |
+
+The judge model (qwen2.5:14b) has a strong **"first-shown answer
+wins" bias**. Without the swap, a naive single-ordering judge would
+report either "noctx clearly better (16 vs 7)" or "ctx clearly better
+(17 vs 5)" depending purely on display order. This is the most
+important methodological takeaway of this notebook for anyone
+running similar evals locally.
+
+### Where ctx helped (6 strict wins)
+
+`t07` complex state objects · `t08` Context API ·
+`t17` Optional chaining · `t20` JSON edge cases ·
+`t21` mutable/immutable array methods · `t25` ES2022 Error Cause.
+
+Pattern: **multi-section / newer-spec topics** where qwen3:8b's
+training-time knowledge of the exact API surface is shaky.
+
+### Where ctx hurt (5 strict losses)
+
+`t02` trivial `<Greeting>` · `t03` alert button · `t10` useEffect deps
+explanation · `t16` object destructuring · `t22` CSV string normalise.
+
+Pattern: **easy / one-liner tasks** where injecting 3-8 chunks of
+tutorial markdown dilutes a 5-line answer. The LLM tries to "use" the
+context, producing wordier output that the judge marks down.
+
+### Cost overhead is real
+
+| metric         | A_noctx | B_ctx | overhead |
+|----------------|---------|-------|----------|
+| latency mean   | 211.6s  | 1139.9s | **5.4×** |
+| latency median | 9.2s    | 90.3s | **9.8×** |
+| output chars (mean)  | 474 | 713 | +50% |
+| tokens out (mean)    | 161 | 275 | +71% |
+
+The latency blow-up is largely **prompt-processing time** for the
+larger prompt, not generation time. For a Claude-Code-style
+interactive workflow, a **5× wait penalty for no measurable quality
+gain** is hard to justify on this corpus + LLM combination.
+
+## Implications
+
+- **For agent-kms users running on a strong general LLM** (Claude /
+  GPT-4 class) with a *generic tech-docs corpus* (React, JS, Python,
+  etc.): retrieval has diminishing returns. The LLM already knows
+  this domain. Retrieval pays off most when (a) the corpus contains
+  knowledge the LLM lacks (internal APIs, post-cutoff specs), or
+  (b) the LLM is weaker than its task demands.
+- **Cherry-picked retrieval matters more than always-on retrieval.**
+  6 of 25 tasks benefited; 5 actively hurt. A retrieval gate that
+  only fires when query embedding similarity to top chunks exceeds
+  a threshold (or a generic "does the LLM need this?" check) would
+  outperform unconditional injection.
+- **Re-run on a private / internal corpus.** Anyone applying this
+  framework to their own knowledge base (where the LLM has zero
+  training exposure) should expect a much larger ctx-win effect.
+  Re-run `notebook 07` with `EVAL_MODE=private` once such a corpus
+  is in place.
+
+## Validity caveats
+
+- **N=25 is small.** A 10pp absolute effect at 80% power needs
+  ~80-100 tasks. With the observed effect (≈0pp), we can comfortably
+  rule out a large effect (>30pp) but not a true small effect
+  (5-10pp) in either direction.
+- **Judge is qwen2.5:14b**, local. A Claude-grade judge would be
+  more reliable. Position-swap mitigates but cannot fully eliminate
+  judge bias. The 13 ties may be a judge-capability artefact.
+- **Corpus and tasks share a domain by construction** — the most
+  optimistic possible setting for retrieval. Real deployments with
+  noisier corpus-task alignment would shift the balance toward
+  noctx, not the other way.
+- **qwen3:8b is one specific target.** A weaker target (e.g.
+  qwen3:1.7b) would likely show a positive ctx effect; a stronger
+  one (Claude) would likely show a smaller effect.
 """),
 ]
 

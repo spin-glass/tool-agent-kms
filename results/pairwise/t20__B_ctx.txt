@@ -1,0 +1,31 @@
+```js
+// 循環参照を含むオブジェクトを JSON.stringify に渡した場合、
+// シリアライズが失敗し、エラーが発生します。
+// これは、JSON.stringify が参照の循環を検出し、例外を投げることで表現されます。
+
+// 例:
+const obj = {};
+obj.self = obj;
+
+try {
+  JSON.stringify(obj);
+} catch (error) {
+  console.error("シリアライズ失敗:", error.message);
+}
+
+// toJSON メソッドを使って回避するコード例:
+class CircularRefHandler {
+  constructor() {
+    this.self = this;
+  }
+
+  toJSON() {
+    // 自分自身を参照するプロパティを除外してシリアライズ
+    const { self, ...rest } = this;
+    return rest;
+  }
+}
+
+const safeObj = new CircularRefHandler();
+console.log(JSON.stringify(safeObj)); // => '{}'
+```

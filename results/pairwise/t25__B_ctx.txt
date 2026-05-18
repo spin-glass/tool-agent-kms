@@ -1,0 +1,23 @@
+```js
+function parseInput(input) {
+    try {
+        // 仮にここにエラーが発生する処理がある
+        const num = parseInt(input);
+        if (isNaN(num)) {
+            throw new Error("無効な数値です");
+        }
+        return num;
+    } catch (err) {
+        // 内側のエラーを cause で包んで再throw
+        throw new Error("入力解析中にエラーが発生しました", { cause: err });
+    }
+}
+
+// catch 側で err.cause を取り出す例
+try {
+    parseInput("abc");
+} catch (err) {
+    console.error("エラーが発生しました:", err.message);
+    console.error("原因のエラー:", err.cause.message);
+}
+```

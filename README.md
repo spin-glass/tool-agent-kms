@@ -6,9 +6,9 @@
 
 ## TL;DR
 
-Across **32 hand-authored Japanese-language retrieval queries** on a
-**127-chunk corpus** of public React and JavaScript Primer Japanese
-documentation, two findings emerged:
+Across **32 hand-authored retrieval queries** and **25 hand-authored
+coding tasks** on a **127-chunk corpus** of public React and JavaScript
+Primer Japanese documentation, three findings emerged:
 
 1. **agent-kms's documented default of `score_threshold=0.93` does not
    generalize.** On this corpus, every in-domain query returns zero
@@ -23,10 +23,20 @@ documentation, two findings emerged:
    a ~80% relative improvement at similar ingest cost and the same
    vector dimensionality.
 
+3. **End-to-end, the retrieved context does NOT measurably improve
+   coding quality on this corpus.** A pairwise study of 25 coding
+   tasks judged by `qwen2.5:14b` (with order-swap to control positional
+   bias) shows ctx wins 6 / noctx wins 5 / ties 13 / McNemar p = 1.0,
+   at a ~5× latency cost. Retrieval helps on newer-spec or multi-section
+   topics; it actively hurts on trivial one-liner tasks where context
+   dilutes the answer.
+
 A user who follows the README defaults on Japanese public documentation
 will get 100% empty results until they calibrate the threshold, and
 even then will be ~40-80% below the F1 ceiling reachable by switching
-the embedding model.
+the embedding model — but should not assume the better retrieval will
+automatically translate to better generated code on a competent LLM
+and a corpus the LLM already knows.
 
 ## Why this study
 
@@ -120,6 +130,49 @@ giving a sharp boundary for the "no false-positive context" regime.
   Effectively a hidden threshold tightening of 0.015.
 - **Query expansion materially helps** on paraphrased queries and on
   adversarial filtering (adv-empty 0.75 → 0.50 when disabled).
+
+### 4. End-to-end pairwise coding evaluation (notebook 07)
+
+Beyond retrieval metrics, **does the retrieved context actually help a
+downstream LLM write better code?** We tested this directly: 25 React/JS
+coding tasks, run twice through Ollama `qwen3:8b` (with vs. without
+agent-kms context), then judged pairwise by `qwen2.5:14b` in **both
+orderings** to neutralise positional bias.
+
+![pairwise outcomes](results/fig_pairwise_outcomes.png)
+
+| outcome | count | share |
+|---|---|---|
+| strict ctx wins (won both orderings)     | **6** | 24% |
+| strict noctx wins                        | **5** | 20% |
+| ties                                     | **13** | 52% |
+| McNemar exact p (ctx vs noctx)           | **1.000** | — |
+| latency overhead (B_ctx mean / A_noctx mean) | **5.4×** | — |
+
+**On this corpus + qwen3:8b, agent-kms context yields no statistically
+significant coding-quality improvement** — and costs ~5× more wall-clock
+time per call. Drilling into individual outcomes:
+
+- **Ctx helps** (6 strict wins) on **multi-section / newer-spec topics**:
+  Context API, Optional chaining, ES2022 Error Cause, JSON edge cases,
+  mutable/immutable array methods.
+- **Ctx hurts** (5 strict losses) on **easy one-liner tasks**: trivial
+  Greeting component, object destructuring, CSV normalisation. Context
+  dilutes a 5-line answer into a verbose 15-line one.
+
+**Methodological note**: the same 50 judge calls without the order-swap
+heuristic would have shown noctx winning 16 vs 7 (AB ordering) **or**
+ctx winning 17 vs 5 (BA ordering) — *the swap heuristic is doing real
+work*. Anyone running similar local LLM-as-judge evals should treat
+single-ordering verdicts as untrustworthy.
+
+**Implication for agent-kms / Claude Code workflows**: always-on
+retrieval is not free. On generic tech-docs corpora with a competent
+LLM, **gated retrieval** (fire only when the corpus actually contains
+domain knowledge the LLM lacks) is likely to dominate. The clearest
+positive signal in this study lives in topics that are either niche
+or post-LLM-training-cutoff — exactly where retrieval should matter
+most.
 
 ## Recommendations
 
@@ -237,6 +290,7 @@ breakdowns are kept local. `results-private/` and any file matching
 | `04_embedding_model_comparison.ipynb` | Compare 4 embedding models, each at its own best threshold. |
 | `05_boost_ablation.ipynb` | Isolate severity / applicability / query-expand contributions. |
 | `06_findings_and_recommendations.ipynb` | Synthesis + recommendations for agent-kms defaults. |
+| `07_pairwise_coding_eval.ipynb` | End-to-end pairwise (with-ctx vs no-ctx) eval on 25 coding tasks using Ollama qwen3:8b + qwen2.5:14b judge. |
 
 ## Repository layout
 
