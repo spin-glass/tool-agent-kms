@@ -265,23 +265,23 @@ def extract_lessons(transcript_tail: str, max_chars: int = 60000) -> list[dict]:
         return []
     lessons = _coerce_to_list_of_dicts(parsed)
     return [
-        l
-        for l in lessons
-        if isinstance(l.get("text"), str) and l["text"].strip()
+        lesson
+        for lesson in lessons
+        if isinstance(lesson.get("text"), str) and lesson["text"].strip()
     ]
 
 
 def sanitize(lessons: list[dict]) -> list[dict]:
     out = []
-    for l in lessons:
-        text = l.get("text", "")
+    for lesson in lessons:
+        text = lesson.get("text", "")
         if FORBIDDEN_RE.search(text):
             continue
         if REJECT_PATTERNS.search(text):
             continue
-        if float(l.get("confidence", 0.0)) < CONFIDENCE_FLOOR:
+        if float(lesson.get("confidence", 0.0)) < CONFIDENCE_FLOOR:
             continue
-        out.append(l)
+        out.append(lesson)
     return out
 
 

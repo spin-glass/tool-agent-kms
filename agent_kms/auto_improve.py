@@ -38,12 +38,12 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Iterator
 
 
 def _resolve_repo_root() -> Path:
     """Resolve the project root (env > config > cwd) lazily."""
     import os
+
     from .config import load_config
 
     env = os.environ.get("AGENT_KMS_KNOWLEDGE_ROOT")

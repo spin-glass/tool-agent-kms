@@ -31,7 +31,6 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Iterable
 
 # Severity policy: how strongly each comment kind is upserted.
 SEVERITY_BY_STATE = {
