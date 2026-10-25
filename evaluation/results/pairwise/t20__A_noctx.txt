@@ -1,0 +1,75 @@
+`JSON.stringify` は、JavaScript のオブジェクトを JSON 文字列に変換するための関数ですが、**循環参照を含むオブジェクトは JSON 化できません**。このようなオブジェクトを `JSON.stringify` に渡すと、**エラーが発生します**。
+
+---
+
+### ✅ 例: 循環参照を含むオブジェクト
+
+```javascript
+const obj = {};
+const self = obj;
+obj.self = self;
+```
+
+このオブジェクトを `JSON.stringify` に渡すと、以下のようなエラーが発生します：
+
+```
+TypeError: Converting circular structure to JSON
+```
+
+---
+
+### ✅ 解決策: `toJSON` メソッドを使う
+
+JavaScript のオブジェクトに `toJSON` メソッドを定義することで、`JSON.stringify` がそのメソッドを呼び出して、JSON に変換可能な形式に変換します。
+
+以下は、循環参照を含むオブジェクトを `toJSON` メソッドで処理する例です。
+
+---
+
+### ✅ コード例
+
+```javascript
+const obj = {
+  name: "Alice",
+  self: null
+};
+
+// 循環参照を設定
+const self = obj;
+obj.self = self;
+
+// toJSON メソッドを定義
+obj.toJSON = function () {
+  const copy = {};
+  for (let key in this) {
+    if (this.hasOwnProperty(key)) {
+      if (key === 'self') {
+        copy[key] = null; // 循環参照を null に置き換える
+      } else {
+        copy[key] = this[key];
+      }
+    }
+  }
+  return copy;
+};
+
+// JSON.stringify で変換
+const jsonString = JSON.stringify(obj);
+console.log(jsonString);
+```
+
+---
+
+### ✅ 出力結果
+
+```json
+{"name":"Alice","self":null}
+```
+
+---
+
+### ✅ 補足
+
+- `toJSON` メソッドは、`JSON.stringify` がオブジェクトを JSON に変換する際、自動的に呼ばれます。
+- この方法は、**循環参照を含むオブジェクトを JSON に変換する**ためのシンプルな方法です。
+- より複雑な処理（例: オブジェクトの深さ制限、特定のプロパティのフィルタリングなど）が必要な場合は、`replacer` 関数や `JSON.stringify` の第3引数としてカスタム処理を実装することもできます。

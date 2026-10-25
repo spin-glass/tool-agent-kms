@@ -1,0 +1,55 @@
+```jsx
+import React, { useReducer } from 'react';
+
+// Reducer 関数
+function todoReducer(state, action) {
+  switch (action.type) {
+    case 'add':
+      return [...state, { id: Date.now(), text: action.payload, completed: false }];
+    case 'remove':
+      return state.filter(todo => todo.id !== action.payload);
+    case 'clear':
+      return [];
+    default:
+      return state;
+  }
+}
+
+// コンポーネント
+function TodoList() {
+  const [todos, dispatch] = useReducer(todoReducer, []);
+
+  const addTodo = (text) => {
+    dispatch({ type: 'add', payload: text });
+  };
+
+  const removeTodo = (id) => {
+    dispatch({ type: 'remove', payload: id });
+  };
+
+  const clearTodos = () => {
+    dispatch({ type: 'clear' });
+  };
+
+  return (
+    <div>
+      <h2>Todo List</h2>
+      <ul>
+        {todos.map(todo => (
+          <li key={todo.id}>
+            {todo.text}
+            <button onClick={() => removeTodo(todo.id)}>Remove</button>
+          </li>
+        ))}
+      </ul>
+      <div>
+        <input type="text" id="todo-input" />
+        <button onClick={() => addTodo(document.getElementById('todo-input').value)}>Add</button>
+        <button onClick={clearTodos}>Clear All</button>
+      </div>
+    </div>
+  );
+}
+
+export default TodoList;
+```

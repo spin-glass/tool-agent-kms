@@ -1,0 +1,12 @@
+```javascript
+const user = {
+  address: {
+    city: 'Tokyo'
+  }
+};
+
+const city = user?.address?.city;
+console.log(city); // Output: Tokyo
+```
+
+このコードでは、`user` が存在しなかったり、`user.address` が `null` または `undefined` だった場合でも、`city` は `undefined` として安全に取得されます。

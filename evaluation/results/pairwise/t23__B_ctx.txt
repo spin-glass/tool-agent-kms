@@ -1,0 +1,44 @@
+以下は、JavaScriptで関数の可変長引数（rest parameters）を使用して、任意個数の数値を受け取って最大値を返す関数 `max(...nums)` の実装です。また、配列を渡すための spread 構文の使用例も示します。
+
+---
+
+### ✅ 関数 `max(...nums)` の実装
+
+```javascript
+function max(...nums) {
+  return Math.max(...nums);
+}
+```
+
+- `...nums` は rest parameters で、関数に任意個数の引数を渡すことができます。
+- `Math.max(...nums)` は、配列 `nums` の要素を展開して最大値を返します。
+
+---
+
+### ✅ 使用例
+
+```javascript
+console.log(max(3, 1, 4, 1, 5)); // 5
+```
+
+---
+
+### ✅ 配列を渡すための spread 構文の使用例
+
+```javascript
+const numbers = [3, 1, 4, 1, 5];
+
+// 配列を展開して関数に渡す
+console.log(max(...numbers)); // 5
+```
+
+- `...numbers` は spread 構文で、配列 `numbers` の要素を個々の引数として展開します。
+- これにより、配列を直接関数に渡すことができます。
+
+---
+
+### ✅ 結論
+
+- `max(...nums)` は、任意個数の数値を受け取り、最大値を返します。
+- 配列を渡す場合は、`...`（spread 構文）を使って展開します。
+- この方法は、柔軟に引数を扱うための JavaScript の強力な機能です。

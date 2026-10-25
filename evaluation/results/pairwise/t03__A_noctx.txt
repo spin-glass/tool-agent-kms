@@ -1,0 +1,13 @@
+```jsx
+import React from 'react';
+
+const AlertButton = () => {
+  const handleClick = () => {
+    alert('clicked');
+  };
+
+  return <button onClick={handleClick}>Click me</button>;
+};
+
+export default AlertButton;
+```

@@ -1,0 +1,64 @@
+```jsx
+import React, { createContext, useContext, useState } from 'react';
+
+// Contextの作成
+const CounterContext = createContext();
+
+// Providerコンポーネント
+const CounterProvider = ({ children }) => {
+  const [count, setCount] = useState(0);
+
+  const increment = () => setCount(prev => prev + 1);
+
+  return (
+    <CounterContext.Provider value={{ count, increment }}>
+      {children}
+    </CounterContext.Provider>
+  );
+};
+
+// ボタンコンポーネント（親コンポーネント）
+const ButtonComponent = () => {
+  const { increment } = useContext(CounterContext);
+
+  return (
+    <button onClick={increment}>
+      Increment
+    </button>
+  );
+};
+
+// 中間コンポーネント（2階層）
+const MiddleComponent = () => {
+  return (
+    <div>
+      <ButtonComponent />
+    </div>
+  );
+};
+
+// 最も深い子コンポーネント（3階層）
+const DeepChildComponent = () => {
+  const { count } = useContext(CounterContext);
+
+  return (
+    <div>
+      <p>カウンタの値: {count}</p>
+    </div>
+  );
+};
+
+// ルートコンポーネント
+const App = () => {
+  return (
+    <CounterProvider>
+      <div>
+        <MiddleComponent />
+        <DeepChildComponent />
+      </div>
+    </CounterProvider>
+  );
+};
+
+export default App;
+```

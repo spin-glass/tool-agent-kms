@@ -1,0 +1,34 @@
+# Schema example for hand-authored evaluation queries.
+# Copy to eval_queries.yaml and populate with real queries.
+#
+# Each item:
+#   id:     stable short identifier (q001, q002, …)
+#   query:  the natural-language question (Japanese OK)
+#   gold:   list of (source, heading) the retrieval should surface.
+#           `source` matches by basename — no need for absolute paths.
+#   notes:  free text — why this query was chosen, edge case it probes, etc.
+
+- id: q001
+  query: "Reactのフックでstateを使う方法"
+  gold:
+    - source: "react-hooks-intro.md"
+      heading: "State Hook"
+    - source: "react-hooks-intro.md"
+      heading: "useState の使い方"
+  notes: "basic hook lookup; expects the hook intro page to surface first"
+
+- id: q002
+  query: "Next.jsのApp RouterでLayoutを共有する"
+  gold:
+    - source: "nextjs-app-router.md"
+      heading: "Layouts"
+  notes: "framework-specific terminology; checks that 'Layout' as a section title is reachable"
+
+- id: q003
+  query: "TypeScript の型ガードの書き方"
+  gold:
+    - source: "typescript-handbook-narrowing.md"
+      heading: "Type Guards"
+    - source: "typescript-handbook-narrowing.md"
+      heading: "User-Defined Type Guards"
+  notes: "multi-relevant: both general and user-defined sections are valid hits"

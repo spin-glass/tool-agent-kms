@@ -1,0 +1,9 @@
+```js
+function safeParse(text) {
+    try {
+        return JSON.parse(text);
+    } catch (error) {
+        return null;
+    }
+}
+```

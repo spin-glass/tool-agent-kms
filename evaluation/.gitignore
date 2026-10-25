@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+build/
+dist/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_meta
+
+# Local-only / never publish — proprietary corpora evaluated via
+# EVAL_MODE=private live here. Aggregate metrics from such a run are
+# publishable (see README "Validation on private corpora"); raw chunks,
+# queries, and per-source breakdowns are not.
+data/private/
+results-private/
+results/*-private.*
+data/*.local.*
+.env
+*.local.yaml
+
+# Cache / models
+.cache/
+.huggingface/
+
+# OS
+.DS_Store
+
+# Results — keep figures (commit for portfolio visibility), drop large CSVs
+results/*.csv
+results/*.parquet
+!results/.gitkeep

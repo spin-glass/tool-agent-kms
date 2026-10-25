@@ -1,0 +1,38 @@
+```jsx
+import React, { useEffect, useState } from 'react';
+
+const EffectExamples = () => {
+  const [count, setCount] = useState(0);
+  const [name, setName] = useState('Alice');
+
+  // ケース1: 依存配列なし
+  // useEffect はコンポーネントがマウント時に1回実行される
+  useEffect(() => {
+    console.log('Case 1: 依存配列なし - コンポーネントがマウント時に実行');
+  });
+
+  // ケース2: 空配列 []
+  // useEffect はコンポーネントがマウント時に1回実行され、再レンダリング時に実行されない
+  useEffect(() => {
+    console.log('Case 2: 空配列 - コンポーネントがマウント時に実行');
+  }, []);
+
+  // ケース3: 特定の値（count）
+  // useEffect は count が変更されるたびに実行される
+  useEffect(() => {
+    console.log(`Case 3: count が変更 - 現在の count: ${count}`);
+  }, [count]);
+
+  return (
+    <div>
+      <h2>React useEffect のケース</h2>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Count Up</button>
+      <p>Name: {name}</p>
+      <button onClick={() => setName('Bob')}>Change Name</button>
+    </div>
+  );
+};
+
+export default EffectExamples;
+```

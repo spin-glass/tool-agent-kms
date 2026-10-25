@@ -1,0 +1,42 @@
+以下は、`isLoggedIn` が `true` のときだけ `<p>ようこそ</p>` を表示する条件付きレンダリングの 2 通りの例です。
+
+---
+
+### (1) `if` 文で早期 return する書き方
+
+```jsx
+function WelcomeMessage({ isLoggedIn }) {
+  if (!isLoggedIn) {
+    return null;
+  }
+
+  return (
+    <p>ようこそ</p>
+  );
+}
+```
+
+この書き方では、`isLoggedIn` が `false` の場合は何も表示せず、`true` の場合のみ `<p>ようこそ</p>` を返します。
+
+---
+
+### (2) JSX 中で `&&` 演算子を使う書き方
+
+```jsx
+function WelcomeMessage({ isLoggedIn }) {
+  return (
+    <>
+      {isLoggedIn && <p>ようこそ</p>}
+    </>
+  );
+}
+```
+
+この書き方では、`isLoggedIn` が `true` の場合にのみ `<p>ようこそ</p>` が表示されます。`false` の場合はその部分が省略されます。
+
+---
+
+### 補足
+
+- `&&` 演算子は、左辺が真のときに右辺を評価します。左辺が偽の場合は右辺は評価されません。
+- どちらの書き方も React で一般的で、どちらを使うかはスタイルの選択になります。

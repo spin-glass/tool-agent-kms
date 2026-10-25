@@ -1,0 +1,304 @@
+# Coding tasks for end-to-end RAG evaluation (pairwise).
+#
+# Each task is run twice through Ollama qwen3:8b:
+#   - condition A: prompt only (no retrieved context)
+#   - condition B: prompt + agent-kms retrieved chunks
+#
+# The two outputs are then judged pairwise by qwen2.5:14b (a stronger
+# local model). Judge order is randomized + swapped to control positional
+# bias.
+#
+# Schema per task:
+#   id:               stable identifier
+#   prompt:           the instruction shown to qwen3:8b
+#   retrieve_query:   the query passed to agent_kms.retrieve()
+#                     (often the same as prompt; sometimes paraphrased
+#                     to match how a user might search the docs)
+#   expected_topics:  what good retrieval *should* surface (informational)
+#   rubric:           short bullets on what makes a correct answer
+#   difficulty:       easy / medium / hard
+
+# ────────────────────────────────────────────────────────────────────────
+# React — basic
+# ────────────────────────────────────────────────────────────────────────
+
+- id: t01
+  difficulty: easy
+  prompt: |
+    Reactで useState を使って、ボタンを押すと数字が 1 ずつ増えるカウンタコンポーネント `Counter` を書いてください。コードのみ、TypeScript 不要。
+  retrieve_query: "useStateでstate変数を追加するカウンタ"
+  expected_topics: ["state 変数の追加", "通常の変数ではうまくいかない例"]
+  rubric:
+    - "useState を import している"
+    - "初期値が 0"
+    - "ボタンクリックで増加 (+1)"
+    - "JSX で現在のカウントを表示"
+
+- id: t02
+  difficulty: easy
+  prompt: |
+    Reactで `Greeting` という関数コンポーネントを書いてください。`name` という string の props を受け取り、`<h1>こんにちは、{name}さん</h1>` を表示します。
+  retrieve_query: "Reactコンポーネントに props を渡す"
+  expected_topics: ["コンポーネントに props を渡す", "お馴染みの props"]
+  rubric:
+    - "関数コンポーネントとして書かれている"
+    - "props.name または分割代入で name を取り出している"
+    - "h1 に '{name}さん' を含む形で表示"
+
+- id: t03
+  difficulty: easy
+  prompt: |
+    Reactで `<button>` をクリックしたときに `alert('clicked')` を発火させるコンポーネント `AlertButton` を書いてください。
+  retrieve_query: "Reactでイベントハンドラを登録する書き方"
+  expected_topics: ["イベントハンドラの追加"]
+  rubric:
+    - "onClick 属性が使われている"
+    - "アロー関数または通常関数で alert を呼んでいる"
+    - "イベントハンドラ内で alert('clicked')"
+
+- id: t04
+  difficulty: medium
+  prompt: |
+    Reactで子コンポーネント `Modal` に JSX を children として渡し、`Modal` がそれを `<div className="modal">` で囲んで表示する例を書いてください。親側の呼び出し例も含めてください。
+  retrieve_query: "ReactでJSXをchildrenとして渡す方法"
+  expected_topics: ["children として JSX を渡す"]
+  rubric:
+    - "Modal が props.children を受け取って描画"
+    - "親で <Modal>...</Modal> 形式で JSX を渡している"
+    - "Modal の中で children を <div className=\"modal\"> でラップ"
+
+- id: t05
+  difficulty: medium
+  prompt: |
+    Reactで条件付きレンダリングの例を 2 通り書いてください: (1) if 文で早期 return する書き方、(2) JSX 中で `&&` 演算子を使う書き方。両方とも、`isLoggedIn` が true のときだけ `<p>ようこそ</p>` を出します。
+  retrieve_query: "Reactで条件によって描画を切り替える書き方"
+  expected_topics: ["条件を満たす場合に JSX を返す", "条件付きで JSX を含める"]
+  rubric:
+    - "1 つ目: if (!isLoggedIn) return null; のような早期 return パターン"
+    - "2 つ目: {isLoggedIn && <p>...</p>} のような && パターン"
+    - "両方ともコンパイル可能"
+
+- id: t06
+  difficulty: medium
+  prompt: |
+    Reactで親コンポーネント `Form` が `name` という state を持ち、子コンポーネント `NameInput` がその state を表示しかつ編集できるようにする例を書いてください。
+  retrieve_query: "Reactでコンポーネント間でstateを共有する"
+  expected_topics: ["コンポーネント間で state を共有する"]
+  rubric:
+    - "親で useState を呼び name を保持"
+    - "子に name と setName (または onChange) を props で渡している"
+    - "子の <input> の onChange で setName を呼ぶ"
+
+- id: t07
+  difficulty: medium
+  prompt: |
+    Reactで複数の input フィールド (name, email, age) を 1 つのコンポーネントで管理してください。state はオブジェクトでまとめ、入力のたびに immutable に更新します。
+  retrieve_query: "Reactで複数のstate変数を扱う"
+  expected_topics: ["コンポーネントで複数の state 変数を使う", "state 構造の選択"]
+  rubric:
+    - "オブジェクト state を useState で持っている"
+    - "setState 時にスプレッド構文 (...prev) で immutable 更新"
+    - "3 つの input が個別に編集可能"
+
+- id: t08
+  difficulty: hard
+  prompt: |
+    Reactで Context API を使って、ボタンを 1 回押すごとに値が +1 されるカウンタの値を、3 階層ネストした子コンポーネントから読み書きできるようにしてください。Provider と useContext の両方を含めてください。
+  retrieve_query: "Reactのコンテクストでデータを深く渡す"
+  expected_topics: ["コンテクストで深くデータを受け渡す"]
+  rubric:
+    - "createContext で Context を作っている"
+    - "Provider で value を渡している"
+    - "深い子で useContext を使い値とインクリメント関数の両方にアクセス"
+
+- id: t09
+  difficulty: hard
+  prompt: |
+    Reactで useReducer を使って、配列に対する `add` / `remove` / `clear` 3 つのアクションをサポートする todo リスト reducer を書いてください。Reducer 関数とそれを使うコンポーネントの両方を示してください。
+  retrieve_query: "Reactのreducerでstateロジックを抽出する"
+  expected_topics: ["state ロジックをリデューサに抽出する"]
+  rubric:
+    - "reducer が 3 アクションすべてを正しく処理"
+    - "useReducer をコンポーネント内で使用"
+    - "dispatch で各アクションを発火する例"
+
+- id: t10
+  difficulty: hard
+  prompt: |
+    Reactの useEffect について、依存配列に応じてエフェクトがどう発火するかを 3 ケース (依存なし、空配列、特定の値) ごとにコメントで説明したコード例を書いてください。
+  retrieve_query: "useEffectは値が変わるたびに動く"
+  expected_topics: ["エフェクトはリアクティブ (reactive) な値に \"反応\" する", "エフェクトのライフサイクル"]
+  rubric:
+    - "依存配列を省略 / [] / [value] の 3 パターンが揃っている"
+    - "各パターンで発火タイミングがコメントで正しく説明されている"
+
+# ────────────────────────────────────────────────────────────────────────
+# JavaScript — basic / intermediate
+# ────────────────────────────────────────────────────────────────────────
+
+- id: t11
+  difficulty: easy
+  prompt: |
+    JavaScript で文字列の配列 `["apple", "banana", "cherry"]` を作成し、それを `for...of` で 1 つずつコンソールに出力するコードを書いてください。
+  retrieve_query: "JavaScriptの配列を作成して順に処理する"
+  expected_topics: ["配列の作成とアクセス", "配列を反復処理するメソッド"]
+  rubric:
+    - "配列リテラル [\"apple\", ...] で配列を作る"
+    - "for...of 文を使用"
+    - "console.log で 1 要素ずつ出力"
+
+- id: t12
+  difficulty: easy
+  prompt: |
+    JavaScript で配列の合計を `reduce` で求める関数 `sum(numbers)` を書いてください。`sum([1, 2, 3, 4])` は 10 を返します。
+  retrieve_query: "JavaScriptの配列でreduceを使う"
+  expected_topics: ["配列を反復処理するメソッド", "メソッドチェーンと高階関数"]
+  rubric:
+    - "reduce が使われている (Array.prototype.reduce)"
+    - "初期値 0 が指定されている"
+    - "戻り値が数値"
+
+- id: t13
+  difficulty: easy
+  prompt: |
+    JavaScript で `try...catch` 構文を使って、`JSON.parse` の失敗を捕捉し、失敗時には null を返す関数 `safeParse(text)` を書いてください。
+  retrieve_query: "JavaScriptでtry catch で例外を捕捉する"
+  expected_topics: ["try...catch構文", "例外処理"]
+  rubric:
+    - "try ブロックで JSON.parse"
+    - "catch で受け取って null を return"
+    - "正常系では parse 結果を return"
+
+- id: t14
+  difficulty: medium
+  prompt: |
+    JavaScript で `throw` 文を使って独自の `ValidationError` クラスを作り、年齢が 0 未満なら投げる関数 `validateAge(age)` を書いてください。catch 側で `err instanceof ValidationError` で判定する使用例も示してください。
+  retrieve_query: "JavaScriptでthrowで例外を投げてエラークラスを定義する"
+  expected_topics: ["throw文", "エラーオブジェクト", "try...catch構文"]
+  rubric:
+    - "Error を継承する ValidationError クラス"
+    - "validateAge が age < 0 で throw"
+    - "instanceof で型判別する catch 例"
+
+- id: t15
+  difficulty: medium
+  prompt: |
+    JavaScript で Promise を返す関数 `fetchUser(id)` を作り、それを async/await で順番に 2 回呼ぶ関数 `fetchTwo()` を書いてください。`fetchUser` の中身は `setTimeout` を使った擬似実装で構いません。
+  retrieve_query: "JavaScriptのasync awaitで非同期を順番に待つ"
+  expected_topics: ["`await`式", "Async Functionの定義", "[ES2017] Async Function"]
+  rubric:
+    - "fetchUser が Promise を返す"
+    - "fetchTwo が async function"
+    - "await が 2 回出てくる、順次実行"
+
+- id: t16
+  difficulty: medium
+  prompt: |
+    JavaScript でオブジェクトの分割代入を使い、`{ name, age, email }` を持つ user オブジェクトから name と email だけを取り出して console.log するコードを書いてください。
+  retrieve_query: "JavaScriptのオブジェクトの分割代入"
+  expected_topics: ["[ES2015] オブジェクトと分割代入"]
+  rubric:
+    - "const { name, email } = user; パターンの分割代入"
+    - "console.log(name, email) を呼んでいる"
+
+- id: t17
+  difficulty: medium
+  prompt: |
+    JavaScript で Optional chaining 演算子 `?.` を使い、ネストしたオブジェクト `user.address.city` が存在しない場合にも安全に取り出せるコードを書いてください。null/undefined を fallback として扱います。
+  retrieve_query: "JavaScriptのオプショナルチェーンでネストしたプロパティ"
+  expected_topics: ["[ES2020] Optional chaining演算子（`?.`）"]
+  rubric:
+    - "user?.address?.city のような ?. の連鎖"
+    - "undefined になる場合の挙動が説明されている"
+
+- id: t18
+  difficulty: medium
+  prompt: |
+    JavaScript で関数 `withLog(fn)` を作ってください。これは関数を受け取り、呼び出し前後に console.log を出す新しい関数を返します (高階関数)。使用例も含めてください。
+  retrieve_query: "JavaScriptの高階関数とコールバック"
+  expected_topics: ["関数はオブジェクト", "コールバック関数"]
+  rubric:
+    - "withLog(fn) が関数を返している"
+    - "返り値の関数が中で fn(...args) を呼び、前後に log"
+    - "使用例で withLog を適用してから呼んでいる"
+
+- id: t19
+  difficulty: hard
+  prompt: |
+    JavaScript で ES2022 の private クラスフィールド (`#field`) を使い、`Counter` クラスを書いてください。値はクラス外からは読めず、`increment()` と `value` ゲッターでのみ操作・取得可能にします。
+  retrieve_query: "JavaScriptのprivateクラスフィールド"
+  expected_topics: ["[ES2022] Privateクラスフィールド", "[ES2022] Publicクラスフィールド"]
+  rubric:
+    - "#count のような # 始まりのフィールド宣言"
+    - "increment() メソッドが #count を更新"
+    - "get value() で読み取り可能"
+
+- id: t20
+  difficulty: hard
+  prompt: |
+    JavaScript で JSON 化できないオブジェクト (循環参照を含むもの) を `JSON.stringify` に渡したときに何が起きるか説明し、それを `toJSON` メソッドを使って回避するコード例を示してください。
+  retrieve_query: "JSON.stringifyとtoJSONでシリアライズできないオブジェクト"
+  expected_topics: ["JSONにシリアライズできないオブジェクト", "`toJSON`メソッドを使ったシリアライズ"]
+  rubric:
+    - "循環参照で TypeError が出ることに触れている"
+    - "toJSON メソッドを実装したオブジェクト例"
+    - "JSON.stringify の戻り値が toJSON の結果を使う"
+
+# ────────────────────────────────────────────────────────────────────────
+# Cross-cutting / harder
+# ────────────────────────────────────────────────────────────────────────
+
+- id: t21
+  difficulty: medium
+  prompt: |
+    JavaScript で配列のメソッドのうち、破壊的なもの (元の配列を変更する) と非破壊的なもの (新しい配列を返す) を 3 つずつ挙げ、それぞれの簡単なコード例を書いてください。
+  retrieve_query: "JavaScriptの配列で破壊的と非破壊的なメソッドの違い"
+  expected_topics: ["破壊的なメソッドと非破壊的なメソッド"]
+  rubric:
+    - "破壊的の例: push / splice / sort などから 3 つ"
+    - "非破壊的の例: map / filter / concat / slice などから 3 つ"
+    - "各メソッドにコード例が付いている"
+
+- id: t22
+  difficulty: medium
+  prompt: |
+    JavaScript で文字列を `,` で分割し、各要素を trim してから `;` で再結合する関数 `normalizeCsv(s)` を書いてください。例: `"a, b ,c"` → `"a;b;c"`。
+  retrieve_query: "JavaScriptで文字列を分割して結合する"
+  expected_topics: ["文字列の分解と結合", "文字列の置換/削除"]
+  rubric:
+    - "split(',') を使用"
+    - "map で trim"
+    - "join(';') で再結合"
+
+- id: t23
+  difficulty: hard
+  prompt: |
+    JavaScript で関数の可変長引数 (rest parameters) を使い、任意個数の数値を受け取って最大値を返す関数 `max(...nums)` を書いてください。`max(3, 1, 4, 1, 5)` は 5 です。配列を渡したい呼び出し側のために spread 構文の使用例も示してください。
+  retrieve_query: "JavaScriptの可変長引数とspread構文"
+  expected_topics: ["可変長引数", "[ES2015] 配列の展開"]
+  rubric:
+    - "...nums の rest 構文"
+    - "Math.max(...nums) などで実装"
+    - "呼び出し側で max(...[1,2,3]) のように spread を使った例"
+
+- id: t24
+  difficulty: hard
+  prompt: |
+    Reactで「state は独立しておりプライベート」という性質を示すコードを書いてください。同じコンポーネント `Card` を 2 つ並べ、それぞれが独自の useState カウンタを持っているため、片方のクリックがもう片方に影響しないことを示します。
+  retrieve_query: "Reactでstateは独立しておりプライベート"
+  expected_topics: ["state は独立しておりプライベート"]
+  rubric:
+    - "Card が useState を持つ関数コンポーネント"
+    - "App で <Card /><Card /> のように 2 個レンダー"
+    - "コメントなどで「各 Card が独立した state」を明示している"
+
+- id: t25
+  difficulty: hard
+  prompt: |
+    JavaScript で `Error Cause` (ES2022) を使い、外側のエラーが内側のエラーを `cause` プロパティで包んで再 throw するコード例を書いてください。catch 側で `err.cause` を取り出す例も含めます。
+  retrieve_query: "JavaScriptのError Causeで内側のエラーを包む"
+  expected_topics: ["[ES2022] Error Cause", "throw文"]
+  rubric:
+    - "new Error('...', { cause: innerErr }) パターン"
+    - "throw で再投げ"
+    - "catch で err.cause を参照する例"

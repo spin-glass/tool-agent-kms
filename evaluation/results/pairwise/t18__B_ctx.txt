@@ -1,0 +1,41 @@
+以下は、`withLog(fn)` 関数の実装例です。この関数は、渡された関数 `fn` を呼び出す前に `console.log` を出力し、呼び出し後に再度 `console.log` を出力する新しい関数を返します。
+
+```javascript
+function withLog(fn) {
+  return function (...args) {
+    console.log('Calling function:', fn.name);
+    const result = fn(...args);
+    console.log('Function called with:', args);
+    console.log('Function result:', result);
+    return result;
+  };
+}
+
+// 使用例
+function add(a, b) {
+  return a + b;
+}
+
+// withLog を使用して add 関数をラップ
+const loggedAdd = withLog(add);
+
+// 関数を呼び出す
+const result = loggedAdd(3, 5);
+console.log('Final result:', result);
+```
+
+### 出力例
+```
+Calling function: add
+Function called with: [3, 5]
+Function result: 8
+Final result: 8
+```
+
+### 説明
+- `withLog(fn)` は高階関数であり、渡された関数 `fn` をラップして新しい関数を返します。
+- 新しい関数は、呼び出し前後に `console.log` を出力します。
+- `fn.name` は関数名を取得し、`args` は関数に渡された引数を表示します。
+- `result` は関数の実行結果を表示します。
+
+このようにして、関数の呼び出し前後を簡単にログ出力できるようになります。

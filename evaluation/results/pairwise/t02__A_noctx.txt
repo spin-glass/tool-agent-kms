@@ -1,0 +1,5 @@
+```jsx
+function Greeting({ name }) {
+  return <h1>こんにちは、{name}さん</h1>;
+}
+```

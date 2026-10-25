@@ -1,0 +1,21 @@
+以下は、`<button>` をクリックしたときに `alert('clicked')` を発火させる `AlertButton` コンポーネントの例です：
+
+```jsx
+import React from 'react';
+
+function AlertButton() {
+  function handleClick() {
+    alert('clicked');
+  }
+
+  return (
+    <button onClick={handleClick}>
+      Click me
+    </button>
+  );
+}
+
+export default AlertButton;
+```
+
+このコンポーネントは、`<button>` 要素をレンダリングし、`onClick` ハンドラとして `handleClick` 関数を指定しています。`handleClick` 関数は、`alert('clicked')` を実行して、クリックイベントを処理します。

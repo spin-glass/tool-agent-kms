@@ -1,0 +1,15 @@
+```javascript
+function normalizeCsv(s) {
+    // 文字列を ',' で分割
+    const parts = s.split(',');
+    // 各要素を trim して配列に格納
+    const trimmedParts = parts.map(part => part.trim());
+    // トリムした要素を ';' で再結合
+    return trimmedParts.join(';');
+}
+
+// 例
+console.log(normalizeCsv("a, b ,c")); // 計算結果: "a;b;c"
+```
+
+この関数は、入力された文字列を `,` で分割し、各要素を前後の空白を削除（trim）した後、`;` で結合して返します。
