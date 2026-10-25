@@ -1,5 +1,7 @@
 # RAG Retrieval Evaluation on Japanese Technical Documents
 
+元は別リポジトリ（spin-glass/rag-evaluation-jp）。agent-kms を評価対象とする。
+
 > Empirical evaluation of threshold-based vector retrieval for Japanese
 > technical documentation, using [agent-kms](https://github.com/spin-glass/agent-kms)
 > as the system under test.
