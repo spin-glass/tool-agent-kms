@@ -1,0 +1,34 @@
+# Project config for rag-evaluation-jp.
+# All evaluation runs against the `eval_corpus` collection so we never touch
+# the personal agent-kms collection.
+
+[knowledge]
+root = "data/corpus"
+
+[store]
+collection = "eval_corpus"
+
+[[ingest.sources]]
+name = "jp_tech_docs"
+kind = "markdown_h2"
+roots = ["."]
+default_severity = "default"
+default_applicability = "topic-specific"
+default_confidence = 1.0
+min_chars = 80
+# Restrict to prefixed corpus files; excludes LICENSES.md and any future
+# meta-documents stored alongside the corpus.
+options = { glob = "*-*.md" }
+
+[retrieve]
+score_threshold = 0.93
+
+[retrieve.severity_boost]
+critical = 0.05
+high = 0.025
+default = 0.0
+
+[retrieve.applicability_boost]
+universal = 0.0
+conditional = -0.005
+"topic-specific" = -0.015

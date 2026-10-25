@@ -1,0 +1,46 @@
+以下は、`fetchUser(id)` という Promise を返す関数と、それを `async/await` で順番に 2 回呼ぶ `fetchTwo()` 関数の例です。
+
+```javascript
+// 擬似実装: fetchUser(id) は setTimeout を使って 1 秒後にユーザー情報を返す
+function fetchUser(id) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        id: id,
+        name: `User ${id}`,
+        email: `user${id}@example.com`
+      });
+    }, 1000);
+  });
+}
+
+// fetchTwo() 関数: fetchUser を 2 回順番に呼び出す
+async function fetchTwo() {
+  try {
+    // 1 回目の呼び出し
+    const user1 = await fetchUser(1);
+    console.log('ユーザー1:', user1);
+
+    // 2 回目の呼び出し
+    const user2 = await fetchUser(2);
+    console.log('ユーザー2:', user2);
+
+    return { user1, user2 };
+  } catch (error) {
+    console.error('エラーが発生しました:', error);
+    throw error;
+  }
+}
+
+// fetchTwo() を実行
+fetchTwo().catch(console.error);
+```
+
+### 説明
+
+- `fetchUser(id)` は、`setTimeout` を使って 1 秒後にユーザー情報を返す擬似 API です。
+- `fetchTwo()` は `async` 関数で、`await` を使って `fetchUser` を 2 回順番に呼び出します。
+- `await` は、`fetchUser` が Promise を返すため、非同期処理を同期的に扱います。
+- エラーハンドリングには `try...catch` 文を使用しています。
+
+このコードは、非同期処理を `async/await` で扱う基本的なパターンを示しています。

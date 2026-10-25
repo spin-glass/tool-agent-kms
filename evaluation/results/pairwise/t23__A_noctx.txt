@@ -1,0 +1,10 @@
+```javascript
+// 関数 max を定義: 可変長引数を用いて任意個数の数値を受け取る
+function max(...nums) {
+  return Math.max(...nums);
+}
+
+// 配列を渡す場合の例: spread 構文を使って配列を展開
+const numbers = [3, 1, 4, 1, 5];
+console.log(max(...numbers)); // 出力: 5
+```

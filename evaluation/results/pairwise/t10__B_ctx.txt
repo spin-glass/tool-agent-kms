@@ -1,0 +1,36 @@
+以下は、`useEffect` が依存配列に応じてどのように発火するかを 3 ケースごとにコメントで説明したコード例です。
+
+```jsx
+import { useEffect, useState } from 'react';
+
+// ケース 1: 依存配列が空 ([])
+// useEffect はコンポーネントがマウントしたときに1回だけ実行される
+// その後は再レンダーされても実行されない
+useEffect(() => {
+  console.log('✅ This effect runs once when the component mounts');
+}, []);
+
+// ケース 2: 依存配列に特定の値を指定
+// useEffect はその値が変化したときに実行される
+// 例: count が変化したときに実行される
+const [count, setCount] = useState(0);
+
+useEffect(() => {
+  console.log(`✅ This effect runs when count changes: ${count}`);
+}, [count]);
+
+// ケース 3: 依存配列に何も指定しない (省略可能)
+// useEffect はコンポーネントがマウントしたときに1回だけ実行される
+// これは空配列 ([] ) と同じ挙動
+useEffect(() => {
+  console.log('✅ This effect runs once when the component mounts (same as empty dependency array)');
+}, []);
+```
+
+### 説明
+
+- **ケース 1**: `useEffect` の依存配列が空配列 `[]` の場合、コンポーネントがマウントしたときに1回だけ実行されます。その後は再レンダーされても実行されません。
+- **ケース 2**: 依存配列に特定の値（例: `count`）を指定すると、その値が変化したときにのみ `useEffect` が実行されます。
+- **ケース 3**: 依存配列に何も指定しない場合、`useEffect` は空配列 `[]` と同じ挙動をします。つまり、コンポーネントがマウントしたときに1回だけ実行されます。
+
+このように、`useEffect` の挙動は依存配列に大きく依存します。依存配列を適切に指定することで、必要なタイミングで副作用を実行できます。

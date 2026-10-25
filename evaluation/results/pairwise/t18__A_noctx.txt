@@ -1,0 +1,23 @@
+```javascript
+function withLog(fn) {
+  return function(...args) {
+    console.log('Calling function:', fn.name, 'with arguments:', args);
+    const result = fn(...args);
+    console.log('Function result:', result);
+    return result;
+  };
+}
+
+// 使用例
+function add(a, b) {
+  return a + b;
+}
+
+const loggedAdd = withLog(add);
+loggedAdd(2, 3);
+```
+
+### 説明:
+- `withLog` は高階関数で、引数として関数 `fn` を受け取り、その関数をラップして返します。
+- ラップされた関数は、呼び出し前後に `console.log` を出力します。
+- 使用例では `add` 関数を `withLog` でラップし、`loggedAdd` として使用します。

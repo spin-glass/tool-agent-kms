@@ -1,0 +1,7 @@
+```javascript
+const user = { name: 'Alice', age: 30, email: 'alice@example.com' };
+
+const { name, email } = user;
+
+console.log(name, email);
+```

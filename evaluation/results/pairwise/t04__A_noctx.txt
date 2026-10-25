@@ -1,0 +1,25 @@
+```jsx
+import React from 'react';
+
+// 子コンポーネント Modal
+const Modal = ({ children }) => {
+  return (
+    <div className="modal">
+      {children}
+    </div>
+  );
+};
+
+// 親コンポーネントの例
+const App = () => {
+  return (
+    <Modal>
+      <div className="modal-content">
+        <p>これはモーダル内のコンテンツです。</p>
+      </div>
+    </Modal>
+  );
+};
+
+export default App;
+```

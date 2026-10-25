@@ -1,0 +1,25 @@
+```javascript
+// ES2022 の Error Cause を使用してエラーを包み込む例
+
+// 内側のエラー
+const innerError = new Error('Something went wrong inside');
+
+// 外側のエラーに cause を設定
+const outerError = new Error('Outer error occurred');
+outerError.cause = innerError;
+
+// エラーを再throw
+throw outerError;
+
+// catch 側で err.cause を取り出す例
+try {
+  // ここにエラーを発生させる処理を書く
+  throw new Error('Outer error occurred');
+} catch (err) {
+  if (err.cause) {
+    console.log('Inner error cause:', err.cause.message);
+  } else {
+    console.log('No cause found');
+  }
+}
+```

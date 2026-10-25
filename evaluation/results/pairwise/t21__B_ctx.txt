@@ -1,0 +1,62 @@
+### 破壊的な配列メソッド（元の配列を変更する）
+
+1. **`push()`**  
+   配列の末尾に要素を追加します。元の配列を変更します。
+
+   ```javascript
+   let arr = [1, 2, 3];
+   arr.push(4);
+   console.log(arr); // [1, 2, 3, 4]
+   ```
+
+2. **`pop()`**  
+   配列の末尾の要素を削除します。元の配列を変更します。
+
+   ```javascript
+   let arr = [1, 2, 3];
+   arr.pop();
+   console.log(arr); // [1, 2]
+   ```
+
+3. **`sort()`**  
+   配列を並び替えます。元の配列を変更します。
+
+   ```javascript
+   let arr = [3, 1, 2];
+   arr.sort((a, b) => a - b);
+   console.log(arr); // [1, 2, 3]
+   ```
+
+---
+
+### 非破壊的な配列メソッド（新しい配列を返す）
+
+1. **`slice()`**  
+   配列の一部を新しい配列として返します。元の配列は変更されません。
+
+   ```javascript
+   let arr = [1, 2, 3, 4];
+   let newArr = arr.slice(1, 3);
+   console.log(newArr); // [2, 3]
+   console.log(arr);    // [1, 2, 3, 4]
+   ```
+
+2. **`map()`**  
+   配列の各要素に対して関数を適用し、新しい配列を返します。元の配列は変更されません。
+
+   ```javascript
+   let arr = [1, 2, 3];
+   let newArr = arr.map(x => x * 2);
+   console.log(newArr); // [2, 4, 6]
+   console.log(arr);    // [1, 2, 3]
+   ```
+
+3. **`filter()`**  
+   配列の要素を条件に応じてフィルタリングし、新しい配列を返します。元の配列は変更されません。
+
+   ```javascript
+   let arr = [1, 2, 3, 4];
+   let newArr = arr.filter(x => x % 2 === 0);
+   console.log(newArr); // [2, 4]
+   console.log(arr);    // [1, 2, 3, 4]
+   ```

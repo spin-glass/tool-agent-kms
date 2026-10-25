@@ -1,0 +1,36 @@
+```javascript
+// 破壊的なメソッド（元の配列を変更する）3つ
+// 1. push()
+let arr1 = [1, 2, 3];
+arr1.push(4); // 元の配列が変更される
+console.log(arr1); // [1, 2, 3, 4]
+
+// 2. pop()
+let arr2 = [1, 2, 3];
+arr2.pop(); // 元の配列が変更される
+console.log(arr2); // [1, 2]
+
+// 3. sort()
+let arr3 = [3, 1, 2];
+arr3.sort(); // 元の配列が変更される
+console.log(arr3); // [1, 2, 3]
+
+// 非破壊的なメソッド（新しい配列を返す）3つ
+// 1. slice()
+let arr4 = [1, 2, 3];
+let newArr4 = arr4.slice(1); // 元の配列は変更されない
+console.log(arr4); // [1, 2, 3]
+console.log(newArr4); // [2, 3]
+
+// 2. concat()
+let arr5 = [1, 2, 3];
+let newArr5 = arr5.concat([4, 5]); // 元の配列は変更されない
+console.log(arr5); // [1, 2, 3]
+console.log(newArr5); // [1, 2, 3, 4, 5]
+
+// 3. map()
+let arr6 = [1, 2, 3];
+let newArr6 = arr6.map(x => x * 2); // 元の配列は変更されない
+console.log(arr6); // [1, 2, 3]
+console.log(newArr6); // [2, 4, 6]
+```

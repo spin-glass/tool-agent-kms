@@ -1,0 +1,66 @@
+以下は、Reactで親コンポーネント `Form` が `name` という state を持ち、子コンポーネント `NameInput` がその state を表示しかつ編集できるようにする例です。
+
+---
+
+### ✅ 完整なコード例
+
+```jsx
+import { useState } from 'react';
+
+export default function Form() {
+  const [name, setName] = useState('John Doe');
+
+  return (
+    <div>
+      <h2>Form Component</h2>
+      <NameInput value={name} onChange={setName} />
+      <p>Current Name: <strong>{name}</strong></p>
+    </div>
+  );
+}
+
+function NameInput({ value, onChange }) {
+  return (
+    <div>
+      <label>
+        Name:
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </label>
+    </div>
+  );
+}
+```
+
+---
+
+### 🔍 説明
+
+- **`Form` コンポーネント**:
+  - `name` という state を保持しています。
+  - `NameInput` コンポーネントに `name` の値と変更処理を渡しています。
+
+- **`NameInput` コンポーネント**:
+  - `value` プロパティで `Form` から受け取った `name` の値を表示します。
+  - `onChange` プロパティで `Form` に変更を通知します。
+  - 入力フィールドでユーザーが名前を編集できるようにしています。
+
+---
+
+### 📌 ポイント
+
+- 親コンポーネントが state を保持し、子コンポーネントがそれを表示・編集できるようにすることで、**データフローの明確さ**と**コンポーネントの分離**が実現されます。
+- `value` と `onChange` を使用することで、**受動的な UI**（controlled component）を実現しています。
+
+---
+
+### 🧪 実行結果
+
+- ユーザーが入力フィールドで名前を変更すると、`Form` コンポーネント内の `<p>` 要素の `name` も即座に更新されます。
+
+---
+
+必要に応じて、`NameInput` をさらに複数のコンポーネントに分割することも可能です。

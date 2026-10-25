@@ -1,0 +1,29 @@
+JavaScript で Optional chaining 演算子 `?.` を使用して、ネストしたオブジェクト `user.address.city` を安全に取り出すコードは以下のようになります。
+
+```javascript
+const user = {
+  address: {
+    city: "Tokyo"
+  }
+};
+
+// user.address.city が存在する場合、その値を取得。存在しない場合、null を返す
+const city = user?.address?.city;
+
+console.log(city); // "Tokyo"
+```
+
+### 説明:
+- `user?.address` は、`user` が `null` または `undefined` でない場合に `address` を評価します。
+- `user?.address?.city` は、`address` が `null` または `undefined` でない場合に `city` を評価します。
+- どちらのプロパティも存在しない場合、`city` は `null` になります。
+
+### null/undefined を fallback として扱う例:
+```javascript
+const city = user?.address?.city ?? "Unknown";
+
+console.log(city); // "Tokyo"（user.address.city が存在する場合）
+// user が undefined または address が undefined の場合、"Unknown" が表示される
+```
+
+このように、Optional chaining 演算子 `?.` を使用することで、ネストしたオブジェクトのプロパティを安全にアクセスできます。

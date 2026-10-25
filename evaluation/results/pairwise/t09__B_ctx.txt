@@ -1,0 +1,87 @@
+以下は、`useReducer` を使って `add` / `remove` / `clear` 3 つのアクションをサポートする todo リストの reducer とその使用例です。
+
+---
+
+### ✅ **Reducer 関数**
+
+```js
+function todoReducer(state, action) {
+  switch (action.type) {
+    case 'add':
+      return [
+        ...state,
+        {
+          id: Date.now(),
+          text: action.text,
+          completed: false
+        }
+      ];
+
+    case 'remove':
+      return state.filter(todo => todo.id !== action.id);
+
+    case 'clear':
+      return [];
+
+    default:
+      return state;
+  }
+}
+```
+
+---
+
+### ✅ **使用例：コンポーネント**
+
+```js
+import { useReducer } from 'react';
+
+export default function TodoList() {
+  const [todos, dispatch] = useReducer(todoReducer, []);
+
+  const handleAdd = (text) => {
+    dispatch({ type: 'add', text });
+  };
+
+  const handleRemove = (id) => {
+    dispatch({ type: 'remove', id });
+  };
+
+  const handleClear = () => {
+    dispatch({ type: 'clear' });
+  };
+
+  return (
+    <div>
+      <h2>Todo List</h2>
+      <ul>
+        {todos.map(todo => (
+          <li key={todo.id}>
+            {todo.text}
+            <button onClick={() => handleRemove(todo.id)}>Remove</button>
+          </li>
+        ))}
+      </ul>
+      <div>
+        <input type="text" placeholder="Enter a new todo" />
+        <button onClick={handleAdd}>Add</button>
+        <button onClick={handleClear}>Clear All</button>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+### ✅ **説明**
+
+- `useReducer` は、複雑な state の管理に適した React ヘルパーです。
+- `add` アクションは新しい todo を追加します。
+- `remove` アクションは指定された ID の todo を削除します。
+- `clear` アクションはすべての todo をクリアします。
+- `dispatch` を使って、各アクションを reducer に送信します。
+
+---
+
+この実装は、React の `useReducer` を正しく使用した例であり、state の管理が明確で拡張性が高いです。

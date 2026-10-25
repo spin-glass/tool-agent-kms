@@ -1,0 +1,57 @@
+```jsx
+import { createContext, useContext, useState } from 'react';
+
+// 1. 創造 Context
+const CounterContext = createContext();
+
+// 2. Provider コンポーネント
+export function CounterProvider({ children }) {
+  const [count, setCount] = useState(0);
+
+  // 値を更新する関数
+  const increment = () => setCount(count + 1);
+
+  return (
+    <CounterContext.Provider value={{ count, increment }}>
+      {children}
+    </CounterContext.Provider>
+  );
+}
+
+// 3. ネストされたコンポーネント（3階層）
+function NestedComponent() {
+  const { count, increment } = useContext(CounterContext);
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>Increment</button>
+      <ChildComponent />
+    </div>
+  );
+}
+
+function ChildComponent() {
+  const { count, increment } = useContext(CounterContext);
+
+  return (
+    <div>
+      <p>Child Count: {count}</p>
+      <button onClick={increment}>Increment</button>
+    </div>
+  );
+}
+
+// 4. ルートコンポーネント
+export default function App() {
+  return (
+    <CounterProvider>
+      <div>
+        <h1>Counter App</h1>
+        <p>Root Count: {useContext(CounterContext).count}</p>
+        <NestedComponent />
+      </div>
+    </CounterProvider>
+  );
+}
+```

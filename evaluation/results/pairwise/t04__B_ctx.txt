@@ -1,0 +1,24 @@
+```jsx
+import React from 'react';
+
+function Modal({ children }) {
+  return (
+    <div className="modal">
+      {children}
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Modal>
+      <div className="modal-content">
+        <h2>Modal Title</h2>
+        <p>This is the content of the modal.</p>
+      </div>
+    </Modal>
+  );
+}
+```
+
+このコードでは、`Modal` コンポーネントが `children` プロパティとして渡された JSX を `<div className="modal">` で囲んで表示しています。親コンポーネント `App` では、`Modal` に JSX を直接渡して使用しています。

@@ -306,7 +306,7 @@ Apple-Silicon Macs with ≥18 GB unified memory.
   as the default for broad applicability; consider switching when your
   corpus is Japanese-heavy.
 
-[rag-eval]: https://github.com/spin-glass/rag-evaluation-jp
+[rag-eval]: evaluation/
 - LLM-based lesson extraction is best-effort. Forbidden-vocab filters
   catch obvious sludge but not subtle low-quality output.
 - Hook templates assume `agent-kms` is on `$PATH` (pipx / global pip
@@ -323,8 +323,10 @@ target, papers, and implementation notes are tracked in
 [`docs/retrieval-roadmap.md`](docs/retrieval-roadmap.md).
 
 Each item is gated by validation in
-[rag-evaluation-jp](https://github.com/spin-glass/rag-evaluation-jp) —
+[rag-evaluation-jp](evaluation/) —
 no defaults change without an empirical result on at least one corpus.
+
+The retrieval evaluation (eval sets, notebooks, results) lives in [`evaluation/`](evaluation/).
 
 ## RAG reference
 

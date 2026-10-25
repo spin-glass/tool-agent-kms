@@ -1,0 +1,30 @@
+```jsx
+import React, { useState } from 'react';
+
+const Card = () => {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div style={{ border: '1px solid #ccc', padding: '10px', margin: '10px', width: '150px', textAlign: 'center' }}>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+};
+
+const App = () => {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+      <Card />
+      <Card />
+    </div>
+  );
+};
+
+export default App;
+```
+
+### 説明:
+- `Card` コンポーネント内では `useState` を使用して独自のカウンタを管理しています。
+- 各 `Card` は独立した `useState` を使用しており、1つのコンポーネントの状態変更が他コンポーネントに影響を与えません。
+- ボタンをクリックしても、それぞれのカウンタは独立して増加します。

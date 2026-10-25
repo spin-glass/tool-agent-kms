@@ -40,7 +40,6 @@ from qdrant_client.models import (
 from .llm import generate as llm_generate
 from .llm import is_available as llm_available
 from .session_extract import (
-    DEDUP_COS_THRESHOLD,
     FORBIDDEN_RE,
     REJECT_PATTERNS,
     _extract_text_from_content,

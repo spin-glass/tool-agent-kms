@@ -1,0 +1,15 @@
+```javascript
+function fetchUser(id) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ id, name: `User ${id}` });
+    }, 1000);
+  });
+}
+
+async function fetchTwo() {
+  const user1 = await fetchUser(1);
+  const user2 = await fetchUser(2);
+  return [user1, user2];
+}
+```

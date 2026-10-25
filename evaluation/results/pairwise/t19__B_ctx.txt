@@ -1,0 +1,18 @@
+```js
+class Counter {
+    #count = 0;
+
+    increment() {
+        this.#count++;
+    }
+
+    get value() {
+        return this.#count;
+    }
+}
+```
+
+### 説明
+- `#count` はプライベートクラスフィールドで、クラス外から直接アクセスすることはできません。
+- `increment()` メソッドは `#count` をインクリメントします。
+- `value` ゲッターは `#count` の値を返します。これにより、クラス外から `value` を取得できますが、`#count` 自体はアクセスできません。

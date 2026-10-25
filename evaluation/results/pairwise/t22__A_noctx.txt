@@ -1,0 +1,5 @@
+```javascript
+function normalizeCsv(s) {
+  return s.split(',').map(item => item.trim()).join(';');
+}
+```
