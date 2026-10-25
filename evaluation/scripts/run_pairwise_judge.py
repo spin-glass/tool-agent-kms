@@ -19,9 +19,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import os
 import random
-import sys
 import time
 import urllib.request
 from pathlib import Path
@@ -187,10 +185,12 @@ def main() -> int:
     out_agg = out_path.with_name(out_path.stem + "_agg.csv")
     with out_raw.open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
-        w.writeheader(); w.writerows(rows)
+        w.writeheader()
+        w.writerows(rows)
     with out_agg.open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(agg_rows[0].keys()))
-        w.writeheader(); w.writerows(agg_rows)
+        w.writeheader()
+        w.writerows(agg_rows)
     print(f"\nwrote {out_raw}\nwrote {out_agg}")
     return 0
 

@@ -5,8 +5,8 @@ Run once at authoring time. The generated .ipynb files are then edited by
 overwrites the notebooks (outputs are lost).
 """
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from _nbgen import write_notebook
@@ -438,6 +438,9 @@ ROOT = Path.cwd()
 while not (ROOT / "pyproject.toml").exists() and ROOT != ROOT.parent:
     ROOT = ROOT.parent
 sys.path.insert(0, str(ROOT))
+from src.eval_utils import resolve_eval_paths
+
+CORPUS_DIR, QUERIES_PATH, COLLECTION = resolve_eval_paths(ROOT)
 
 MODELS = [
     ("intfloat/multilingual-e5-base",   768),
